@@ -24,3 +24,5 @@ nlc = executable(
   include_directories: [ nlc_inc, libnlc_inc ],
   link_with: libnlc,
 )
+
+subdir('tests')
