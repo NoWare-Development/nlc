@@ -38,13 +38,13 @@ enum TokenType
 
 struct Token
 {
+  TokenType type = TokenType::TOKEN_TYPE_INVALID;
+
   std::string identifier{};
   long long ivalue{};
   double fvalue{};
   std::string strvalue{};
   char cvalue{};
-
-  TokenType type = TokenType::TOKEN_TYPE_INVALID;
 
   std::string
   to_string ()
