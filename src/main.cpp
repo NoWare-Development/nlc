@@ -41,12 +41,12 @@ main (int argc, char **argv)
   file_stream.read (src, 8192);
   file_stream.close ();
 
-  Lexer lexer{};
+  nlc::Lexer lexer{};
   auto tokens = lexer.get_tokens (src);
 
   for (auto &tok : tokens)
     {
-      if (tok.type == TokenType::TOKEN_TYPE_INVALID)
+      if (tok.type == nlc::TokenType::TOKEN_TYPE_INVALID)
         {
           std::cerr << "Found invalid token\n";
           return -3;

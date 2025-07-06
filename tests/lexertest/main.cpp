@@ -19,40 +19,44 @@ hello_world_test ()
     }
   )";
 
-  Lexer lexer{};
+  nlc::Lexer lexer{};
   auto tokens = lexer.get_tokens (src);
 
-  const std::vector<Token> expected_tokens = {
-    Token{ .type = TokenType::TOKEN_TYPE_ID, .identifier = "import" },
-    Token{ .type = TokenType::TOKEN_TYPE_ID, .identifier = "std" },
-    Token{ .type = TokenType::TOKEN_TYPE_PERIOD },
-    Token{ .type = TokenType::TOKEN_TYPE_ID, .identifier = "io" },
-    Token{ .type = TokenType::TOKEN_TYPE_SEMICOL },
+  const std::vector<nlc::Token> expected_tokens = {
+    nlc::Token{ .type = nlc::TokenType::TOKEN_TYPE_ID,
+                .identifier = "import" },
+    nlc::Token{ .type = nlc::TokenType::TOKEN_TYPE_ID, .identifier = "std" },
+    nlc::Token{ .type = nlc::TokenType::TOKEN_TYPE_PERIOD },
+    nlc::Token{ .type = nlc::TokenType::TOKEN_TYPE_ID, .identifier = "io" },
+    nlc::Token{ .type = nlc::TokenType::TOKEN_TYPE_SEMICOL },
 
-    Token{ .type = TokenType::TOKEN_TYPE_ID, .identifier = "int" },
-    Token{ .type = TokenType::TOKEN_TYPE_ID, .identifier = "main" },
-    Token{ .type = TokenType::TOKEN_TYPE_LPAREN },
-    Token{ .type = TokenType::TOKEN_TYPE_ID, .identifier = "int" },
-    Token{ .type = TokenType::TOKEN_TYPE_ID, .identifier = "argc" },
-    Token{ .type = TokenType::TOKEN_TYPE_COMMA },
-    Token{ .type = TokenType::TOKEN_TYPE_ID, .identifier = "char" },
-    Token{ .type = TokenType::TOKEN_TYPE_ASTERISK },
-    Token{ .type = TokenType::TOKEN_TYPE_ASTERISK },
-    Token{ .type = TokenType::TOKEN_TYPE_ID, .identifier = "argv" },
-    Token{ .type = TokenType::TOKEN_TYPE_RPAREN },
-    Token{ .type = TokenType::TOKEN_TYPE_LBRACE },
+    nlc::Token{ .type = nlc::TokenType::TOKEN_TYPE_ID, .identifier = "int" },
+    nlc::Token{ .type = nlc::TokenType::TOKEN_TYPE_ID, .identifier = "main" },
+    nlc::Token{ .type = nlc::TokenType::TOKEN_TYPE_LPAREN },
+    nlc::Token{ .type = nlc::TokenType::TOKEN_TYPE_ID, .identifier = "int" },
+    nlc::Token{ .type = nlc::TokenType::TOKEN_TYPE_ID, .identifier = "argc" },
+    nlc::Token{ .type = nlc::TokenType::TOKEN_TYPE_COMMA },
+    nlc::Token{ .type = nlc::TokenType::TOKEN_TYPE_ID, .identifier = "char" },
+    nlc::Token{ .type = nlc::TokenType::TOKEN_TYPE_ASTERISK },
+    nlc::Token{ .type = nlc::TokenType::TOKEN_TYPE_ASTERISK },
+    nlc::Token{ .type = nlc::TokenType::TOKEN_TYPE_ID, .identifier = "argv" },
+    nlc::Token{ .type = nlc::TokenType::TOKEN_TYPE_RPAREN },
+    nlc::Token{ .type = nlc::TokenType::TOKEN_TYPE_LBRACE },
 
-    Token{ .type = TokenType::TOKEN_TYPE_ID, .identifier = "println" },
-    Token{ .type = TokenType::TOKEN_TYPE_LPAREN },
-    Token{ .type = TokenType::TOKEN_TYPE_STRING, .strvalue = "Hello, World!" },
-    Token{ .type = TokenType::TOKEN_TYPE_RPAREN },
-    Token{ .type = TokenType::TOKEN_TYPE_SEMICOL },
+    nlc::Token{ .type = nlc::TokenType::TOKEN_TYPE_ID,
+                .identifier = "println" },
+    nlc::Token{ .type = nlc::TokenType::TOKEN_TYPE_LPAREN },
+    nlc::Token{ .type = nlc::TokenType::TOKEN_TYPE_STRING,
+                .strvalue = "Hello, World!" },
+    nlc::Token{ .type = nlc::TokenType::TOKEN_TYPE_RPAREN },
+    nlc::Token{ .type = nlc::TokenType::TOKEN_TYPE_SEMICOL },
 
-    Token{ .type = TokenType::TOKEN_TYPE_ID, .identifier = "return" },
-    Token{ .type = TokenType::TOKEN_TYPE_NUMBER, .ivalue = 0 },
-    Token{ .type = TokenType::TOKEN_TYPE_SEMICOL },
+    nlc::Token{ .type = nlc::TokenType::TOKEN_TYPE_ID,
+                .identifier = "return" },
+    nlc::Token{ .type = nlc::TokenType::TOKEN_TYPE_NUMBER, .ivalue = 0 },
+    nlc::Token{ .type = nlc::TokenType::TOKEN_TYPE_SEMICOL },
 
-    Token{ .type = TokenType::TOKEN_TYPE_RBRACE },
+    nlc::Token{ .type = nlc::TokenType::TOKEN_TYPE_RBRACE },
   };
 
   if (expected_tokens.size () != tokens.size ())

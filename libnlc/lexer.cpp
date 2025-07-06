@@ -4,6 +4,9 @@
 #include <cmath>
 #include <vector>
 
+namespace nlc
+{
+
 std::vector<Token>
 Lexer::get_tokens (const std::string &src)
 {
@@ -535,4 +538,6 @@ Lexer::skip_c_comments (const std::string &src)
             }
         }
     }
+}
+
 }

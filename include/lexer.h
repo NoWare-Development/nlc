@@ -3,6 +3,9 @@
 #include <string>
 #include <vector>
 
+namespace nlc
+{
+
 enum TokenType
 {
   TOKEN_TYPE_INVALID = 0,
@@ -233,3 +236,5 @@ private:
   void skip_cpp_comments (const std::string &src);
   void skip_c_comments (const std::string &src);
 };
+
+}
