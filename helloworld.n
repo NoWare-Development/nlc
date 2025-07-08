@@ -1,6 +1,19 @@
 import std.io;
 
 int main(int argc, char **argv) {
-  println("Hello, World!");
+  println("\tHello, World!\r"); // "<tab> Hello, World! <carriage return>"
+  char newline = '\n';
+
+  int test = 5;
+  float testf = 5.5f;
+
+  char chars_array[5000] = { 'H', 'e', 'l', 'l', 'o', '!', '\n' };
+  print(chars_array); // "Hello! <newline>"
+
+  chars_array[1] = 'i';
+  chars_array[2] = '!';
+  chars_array[3] = 0;
+  println(chars_array); // "Hi!"
+
   return 0;
 }

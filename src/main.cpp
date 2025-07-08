@@ -1,60 +1,40 @@
-#include "args.h"
+#include <cstddef>
 #include <fstream>
 #include <iostream>
-#include <lexer.h>
-
-void
-print_help ()
-{
-  // TODO: implementation
-}
+#include <lexer.hpp>
+#include <parser.hpp>
 
 int
 main (int argc, char **argv)
 {
-  ArgParser arg_parser (argc, argv);
-  if (!arg_parser.has_arguments ())
+  // TODO: proper args parser
+  if (argc < 2)
     {
-      print_help ();
-      return 0;
-    }
-
-  auto files = arg_parser.get_dangling_arguments ();
-  std::string file{};
-  if (files.size () > 0)
-    {
-      file = files[0];
-    }
-  else
-    {
-      std::cerr << "You must provide source files.\n";
       return -1;
     }
 
-  std::fstream file_stream = std::fstream (file);
-  if (!file_stream.is_open ())
+  std::fstream file (argv[1]);
+  if (!file.is_open ())
     {
-      std::cerr << "Failed to open file \"" << file << "\"\n";
       return -2;
     }
-  char src[8192] = {};
-  file_stream.read (src, 8192);
-  file_stream.close ();
+
+  constexpr size_t max_file_size = 8192;
+  char buf[max_file_size] = { 0 };
+  file.read (buf, 8192);
+  file.close ();
+  std::string src (buf);
 
   nlc::Lexer lexer{};
-  auto tokens = lexer.get_tokens (src);
-
+  auto tokens = lexer.tokenize (src);
   for (auto &tok : tokens)
     {
-      if (tok.type == nlc::TokenType::TOKEN_TYPE_INVALID)
-        {
-          std::cerr << "Found invalid token\n";
-          return -3;
-        }
       std::cout << tok.to_string () << '\n';
     }
-  std::cout << "Total number of tokens: " << std::to_string (tokens.size ())
-            << '\n';
+
+  nlc::Parser parser{};
+  auto cst = parser.parse (tokens);
+  std::cout << "parsed successfully\n";
 
   return 0;
 }

@@ -1,19 +1,19 @@
-#include "lexer.h"
-
+#include "lexer.hpp"
 #include <cctype>
-#include <cmath>
+#include <iostream>
 #include <vector>
 
 namespace nlc
 {
 
 std::vector<Token>
-Lexer::get_tokens (const std::string &src)
+Lexer::tokenize (const std::string &src)
 {
+  this->src = src;
   pos = 0;
+  srclen = src.length ();
 
-  const size_t srclen = src.length ();
-  std::vector<Token> tokens{};
+  std::vector<Token> out{};
 
   while (pos < srclen)
     {
@@ -24,26 +24,46 @@ Lexer::get_tokens (const std::string &src)
           continue;
         }
 
-      if (isdigit (c))
-        {
-          tokens.push_back (process_number (src));
-          continue;
-        }
-
       if (is_identifier_start (c))
         {
-          tokens.push_back (process_identifier (src));
-          continue;
-        }
-      if (c == '"')
-        {
-          tokens.push_back (process_string (src));
+          out.push_back (process_identifier ());
           continue;
         }
 
-      if (c == '\'')
+      if (isdigit (c))
         {
-          tokens.push_back (process_symbol (src));
+          out.push_back (process_number ());
+          continue;
+        }
+
+      if (c == '/')
+        {
+          if (pos + 1 < srclen)
+            {
+              char next = src.at (pos + 1);
+              if (next == '/')
+                {
+                  pos += 2;
+                  skip_cpp_comments ();
+                  continue;
+                }
+              else if (next == '*')
+                {
+                  pos += 2;
+                  skip_c_comments ();
+                  continue;
+                }
+            }
+        }
+
+      if (c == '"')
+        {
+          out.push_back (process_string ());
+          continue;
+        }
+      else if (c == '\'')
+        {
+          out.push_back (process_symbol ());
           continue;
         }
 
@@ -51,243 +71,260 @@ Lexer::get_tokens (const std::string &src)
         {
         case '=':
           {
-            tokens.push_back ((Token){ .type = TokenType::TOKEN_TYPE_EQ });
-          }
-          break;
-
-        case ';':
-          {
-            tokens.push_back (
-                (Token){ .type = TokenType::TOKEN_TYPE_SEMICOL });
-          }
-          break;
-
-        case ':':
-          {
-            tokens.push_back ((Token){ .type = TokenType::TOKEN_TYPE_COLON });
-          }
-          break;
-
-        case ',':
-          {
-            tokens.push_back ((Token){ .type = TokenType::TOKEN_TYPE_COMMA });
-          }
-          break;
-
-        case '.':
-          {
-            tokens.push_back ((Token){ .type = TokenType::TOKEN_TYPE_PERIOD });
+            if (pos + 1 < srclen && src.at (pos + 1) == '=')
+              {
+                out.emplace_back (TokenType::TOKEN_TYPE_EQ_EQ);
+                pos++;
+                break;
+              }
+            out.emplace_back (TokenType::TOKEN_TYPE_EQ);
           }
           break;
 
         case '(':
           {
-            tokens.push_back ((Token){ .type = TokenType::TOKEN_TYPE_LPAREN });
+            out.emplace_back (TokenType::TOKEN_TYPE_LPAREN);
           }
           break;
         case ')':
           {
-            tokens.push_back ((Token){ .type = TokenType::TOKEN_TYPE_RPAREN });
-          }
-          break;
-
-        case '{':
-          {
-            tokens.push_back ((Token){ .type = TokenType::TOKEN_TYPE_LBRACE });
-          }
-          break;
-        case '}':
-          {
-            tokens.push_back ((Token){ .type = TokenType::TOKEN_TYPE_RBRACE });
+            out.emplace_back (TokenType::TOKEN_TYPE_RPAREN);
           }
           break;
 
         case '[':
           {
-            tokens.push_back ((Token){ .type = TokenType::TOKEN_TYPE_LBRACK });
+            out.emplace_back (TokenType::TOKEN_TYPE_LBRACK);
           }
           break;
         case ']':
           {
-            tokens.push_back ((Token){ .type = TokenType::TOKEN_TYPE_RBRACK });
+            out.emplace_back (TokenType::TOKEN_TYPE_RBRACK);
+          }
+          break;
+
+        case '{':
+          {
+            out.emplace_back (TokenType::TOKEN_TYPE_LBRACE);
+          }
+          break;
+        case '}':
+          {
+            out.emplace_back (TokenType::TOKEN_TYPE_RBRACE);
           }
           break;
 
         case '<':
           {
-            tokens.push_back ((Token){ .type = TokenType::TOKEN_TYPE_LARROW });
+            if (pos + 1 < srclen && src.at (pos + 1) == '=')
+              {
+                out.emplace_back (TokenType::TOKEN_TYPE_LARROW_EQ);
+                pos++;
+                break;
+              }
+            out.emplace_back (TokenType::TOKEN_TYPE_LARROW);
           }
           break;
         case '>':
           {
-            tokens.push_back ((Token){ .type = TokenType::TOKEN_TYPE_RARROW });
+            if (pos + 1 < srclen && src.at (pos + 1) == '=')
+              {
+                out.emplace_back (TokenType::TOKEN_TYPE_RARROW_EQ);
+                pos++;
+                break;
+              }
+            out.emplace_back (TokenType::TOKEN_TYPE_RARROW);
+          }
+          break;
+
+        case '*':
+          {
+            if (pos + 1 < srclen && src.at (pos + 1) == '=')
+              {
+                out.emplace_back (TokenType::TOKEN_TYPE_ASTERISK_EQ);
+                pos++;
+                break;
+              }
+            out.emplace_back (TokenType::TOKEN_TYPE_ASTERISK);
+          }
+          break;
+
+        case '/':
+          {
+            if (pos + 1 < srclen && src.at (pos + 1) == '=')
+              {
+                out.emplace_back (TokenType::TOKEN_TYPE_SLASH_EQ);
+                pos++;
+                break;
+              }
+            out.emplace_back (TokenType::TOKEN_TYPE_SLASH);
+          }
+          break;
+
+        case '+':
+          {
+            if (pos + 1 < srclen)
+              {
+                char c2 = src.at (pos + 1);
+                if (c2 == '+')
+                  {
+                    out.emplace_back (TokenType::TOKEN_TYPE_PLUS_PLUS);
+                    pos++;
+                    break;
+                  }
+                else if (c2 == '=')
+                  {
+                    out.emplace_back (TokenType::TOKEN_TYPE_PLUS_EQ);
+                    pos++;
+                    break;
+                  }
+              }
+            out.emplace_back (TokenType::TOKEN_TYPE_PLUS);
+          }
+          break;
+        case '-':
+          {
+            if (pos + 1 < srclen)
+              {
+                char c2 = src.at (pos + 1);
+                if (c2 == '-')
+                  {
+                    out.emplace_back (TokenType::TOKEN_TYPE_MINUS_MINUS);
+                    pos++;
+                    break;
+                  }
+                else if (c2 == '=')
+                  {
+                    out.emplace_back (TokenType::TOKEN_TYPE_MINUS_EQ);
+                    pos++;
+                    break;
+                  }
+              }
+            out.emplace_back (TokenType::TOKEN_TYPE_MINUS);
+          }
+          break;
+
+        case '^':
+          {
+            if (pos + 1 < srclen && src.at (pos + 1) == '=')
+              {
+                out.emplace_back (TokenType::TOKEN_TYPE_CACCENT_EQ);
+                pos++;
+                break;
+              }
+            out.emplace_back (TokenType::TOKEN_TYPE_CACCENT);
           }
           break;
 
         case '&':
           {
-            tokens.push_back (
-                (Token){ .type = TokenType::TOKEN_TYPE_AMPERSAND });
+            if (pos + 1 < srclen)
+              {
+                char c2 = src.at (pos + 1);
+                if (c2 == '&')
+                  {
+                    out.emplace_back (
+                        TokenType::TOKEN_TYPE_AMPERSAND_AMPERSAND);
+                    pos++;
+                    break;
+                  }
+                else if (c2 == '=')
+                  {
+                    out.emplace_back (TokenType::TOKEN_TYPE_AMPERSAND_EQ);
+                    pos++;
+                    break;
+                  }
+              }
+            out.emplace_back (TokenType::TOKEN_TYPE_AMPERSAND);
           }
           break;
-        case '*':
-          {
-            tokens.push_back (
-                (Token){ .type = TokenType::TOKEN_TYPE_ASTERISK });
-          }
-          break;
-        case '^':
-          {
-            tokens.push_back (
-                (Token){ .type = TokenType::TOKEN_TYPE_CACCENT });
-          }
-          break;
+
         case '|':
           {
-            tokens.push_back ((Token){ .type = TokenType::TOKEN_TYPE_PIPE });
-          }
-          break;
-        case '+':
-          {
-            tokens.push_back ((Token){ .type = TokenType::TOKEN_TYPE_PLUS });
-          }
-          break;
-        case '-':
-          {
-            tokens.push_back ((Token){ .type = TokenType::TOKEN_TYPE_MINUS });
-          }
-          break;
-        case '/':
-          {
-            if (src.at (pos + 1) == '/')
+            if (pos + 1 < srclen)
               {
-                // Skip C++ styled comments
-                skip_cpp_comments (src);
+                char c2 = src.at (pos + 1);
+                if (c2 == '|')
+                  {
+                    out.emplace_back (TokenType::TOKEN_TYPE_PIPE_PIPE);
+                    pos++;
+                    break;
+                  }
+                else if (c2 == '=')
+                  {
+                    out.emplace_back (TokenType::TOKEN_TYPE_PIPE_EQ);
+                    pos++;
+                    break;
+                  }
+              }
+            out.emplace_back (TokenType::TOKEN_TYPE_PIPE);
+          }
+          break;
+
+        case '~':
+          {
+            if (pos + 1 < srclen && src.at (pos + 1) == '=')
+              {
+                out.emplace_back (TokenType::TOKEN_TYPE_TILDE_EQ);
+                pos++;
                 break;
               }
-            else if (src.at (pos + 1) == '*')
-              {
-                // Skip C styled comments
-                skip_c_comments (src);
-                break;
-              }
-            tokens.push_back ((Token){ .type = TokenType::TOKEN_TYPE_SLASH });
+            out.emplace_back (TokenType::TOKEN_TYPE_TILDE);
           }
           break;
-        case '\\':
+
+        case '#':
           {
-            tokens.push_back ((Token){ .type = TokenType::TOKEN_TYPE_BSLASH });
+            out.emplace_back (TokenType::TOKEN_TYPE_HASH);
+          }
+          break;
+
+        case '%':
+          {
+            if (pos + 1 < srclen && src.at (pos + 1) == '=')
+              {
+                out.emplace_back (TokenType::TOKEN_TYPE_PERCENT_EQ);
+                pos++;
+                break;
+              }
+            out.emplace_back (TokenType::TOKEN_TYPE_PERCENT);
           }
           break;
 
         case '!':
           {
-            tokens.push_back (
-                (Token){ .type = TokenType::TOKEN_TYPE_EXCLMARK });
+            if (pos + 1 < srclen && src.at (pos + 1) == '=')
+              {
+                out.emplace_back (TokenType::TOKEN_TYPE_EXCLMARK_EQ);
+                pos++;
+                break;
+              }
+            out.emplace_back (TokenType::TOKEN_TYPE_EXCLMARK);
           }
           break;
 
-        default:
-          // TODO: error
+        case ':':
+          {
+            out.emplace_back (TokenType::TOKEN_TYPE_COLON);
+          }
           break;
-        }
-
-      pos++;
-    }
-
-  return tokens;
-}
-
-Token
-Lexer::process_number (const std::string &src)
-{
-  char c = src.at (pos);
-  if (c == '0')
-    {
-      char c2 = src.at (pos + 1);
-
-      if (isdigit (c2))
-        {
-          return process_octal (src);
-        }
-
-      switch (c2)
-        {
-        case 'x':
-          return process_hexadecimal (src);
-
-        case 'b':
-          return process_binary (src);
-
+        case ';':
+          {
+            out.emplace_back (TokenType::TOKEN_TYPE_SEMICOL);
+          }
+          break;
+        case ',':
+          {
+            out.emplace_back (TokenType::TOKEN_TYPE_COMMA);
+          }
+          break;
         case '.':
-          return {};
-
-        default:
-          Token zero{};
-          zero.type = TokenType::TOKEN_TYPE_NUMBER;
-          zero.ivalue = 0;
-          pos++;
-          return zero;
-        }
-    }
-
-  std::string numbuf{};
-  while (pos < src.length ())
-    {
-      c = src.at (pos);
-      if (c == '\'' || c == '_')
-        {
-          pos++;
-          continue;
-        }
-
-      if (!isdigit (c) && c != '.')
-        {
+          {
+            out.emplace_back (TokenType::TOKEN_TYPE_PERIOD);
+          }
           break;
         }
 
-      numbuf += c;
-      pos++;
-    }
-
-  if (numbuf.find ('.') != numbuf.npos)
-    {
-      return process_floating (numbuf);
-    }
-
-  return process_decimal (numbuf);
-}
-
-Token
-Lexer::process_hexadecimal (const std::string &src)
-{
-  Token out{};
-  out.type = TokenType::TOKEN_TYPE_NUMBER;
-
-  pos += 2;
-  while (pos < src.length ())
-    {
-      char c = src.at (pos);
-
-      if (!isxdigit (c))
-        {
-          break;
-        }
-
-      if (c >= 'A')
-        {
-          c = c - 'A' + 0xA;
-        }
-      else if (c >= 'a')
-        {
-          c = c - 'a' + 0xA;
-        }
-      else
-        {
-          c -= '0';
-        }
-
-      out.ivalue = (out.ivalue << 4) | c;
       pos++;
     }
 
@@ -295,13 +332,114 @@ Lexer::process_hexadecimal (const std::string &src)
 }
 
 Token
-Lexer::process_binary (const std::string &src)
+Lexer::process_identifier ()
 {
-  Token out{};
-  out.type = TokenType::TOKEN_TYPE_NUMBER;
+  std::string name{};
+  while (pos < srclen)
+    {
+      char c = src.at (pos);
+      if (!is_identifier_char (c))
+        {
+          break;
+        }
+
+      name += c;
+      pos++;
+    }
+
+  return Token (TokenType::TOKEN_TYPE_ID, name);
+}
+
+Token
+Lexer::process_number ()
+{
+  char c = src.at (pos);
+  if (c == '0')
+    {
+      char next = src.at (pos + 1);
+      if (isdigit (next))
+        {
+          return process_octal ();
+        }
+
+      switch (next)
+        {
+        case 'x':
+          return process_hexadecimal ();
+        case 'b':
+          return process_binary ();
+        default:
+          pos++;
+          return Token (TokenType::TOKEN_TYPE_NUMBER, "0");
+        }
+    }
+
+  std::string buf{};
+  bool floating = false;
+  while (pos < srclen)
+    {
+      char c = src.at (pos);
+      if (!isdigit (c) && c != '.')
+        {
+          if (c == '\'' || c == '_')
+            {
+              pos++;
+              continue;
+            }
+
+          break;
+        }
+
+      if (c == '.')
+        {
+          if (!floating)
+            {
+              floating = true;
+            }
+          else
+            {
+              // TODO: error double dot in number.
+              return Token ();
+            }
+        }
+
+      buf += c;
+      pos++;
+    }
+
+  return Token (floating ? TokenType::TOKEN_TYPE_FLOATING
+                         : TokenType::TOKEN_TYPE_NUMBER,
+                buf);
+}
+
+Token
+Lexer::process_hexadecimal ()
+{
+  std::string val = "0x";
 
   pos += 2;
-  while (pos < src.length ())
+  while (pos < srclen)
+    {
+      char c = src.at (pos);
+      if (!isxdigit (c))
+        {
+          break;
+        }
+
+      val += c;
+      pos++;
+    }
+
+  return Token (TokenType::TOKEN_TYPE_NUMBER, val);
+}
+
+Token
+Lexer::process_binary ()
+{
+  std::string val = "0b";
+
+  pos += 2;
+  while (pos < srclen)
     {
       char c = src.at (pos);
       if (c != '1' && c != '0')
@@ -309,194 +447,128 @@ Lexer::process_binary (const std::string &src)
           break;
         }
 
-      out.ivalue = (out.ivalue << 1) | (c & 1);
+      val += c;
       pos++;
     }
 
-  return out;
+  return Token (TokenType::TOKEN_TYPE_NUMBER, val);
 }
 
 Token
-Lexer::process_octal (const std::string &src)
-{ // TODO: implementation.
-  return {};
-}
-
-Token
-Lexer::process_decimal (const std::string &value)
+Lexer::process_octal ()
 {
-  Token out{};
-  out.type = TokenType::TOKEN_TYPE_NUMBER;
+  std::string val = "0";
 
-  for (auto c : value)
-    {
-      out.ivalue = (out.ivalue * 10) + c - '0';
-    }
-
-  return out;
-}
-
-Token
-Lexer::process_floating (const std::string &value)
-{
-  Token out{};
-  out.type = TokenType::TOKEN_TYPE_NUMBER_FLOATING;
-
-  bool after_dot = false;
-
-  double before_dot_part{};
-  double after_dot_part{};
-  size_t after_dot_times = 1;
-
-  for (char c : value)
-    {
-      if (c == '.')
-        {
-          if (after_dot)
-            {
-              return {};
-            }
-
-          after_dot = true;
-          continue;
-        }
-
-      c -= '0';
-
-      if (after_dot)
-        {
-          after_dot_part += (double)c / pow (10, after_dot_times++);
-        }
-      else
-        {
-          before_dot_part = (before_dot_part * 10) + c;
-        }
-    }
-
-  out.fvalue = after_dot_part + before_dot_part;
-
-  return out;
-}
-
-Token
-Lexer::process_identifier (const std::string &src)
-{
-  Token out{};
-  out.type = TokenType::TOKEN_TYPE_ID;
-  out.identifier = src.at (pos++);
-
-  while (pos < src.length ())
+  pos += 1;
+  while (pos < srclen)
     {
       char c = src.at (pos);
-      if (!is_identifier_char (c))
+      if (c < '0' || c > '7')
         {
           break;
         }
-      out.identifier += c;
+
+      val += c;
       pos++;
     }
 
-  return out;
+  return Token (TokenType::TOKEN_TYPE_NUMBER, val);
 }
 
 Token
-Lexer::process_string (const std::string &src)
+Lexer::process_string ()
 {
-  Token out{};
-  out.type = TokenType::TOKEN_TYPE_STRING;
+  std::string str{};
 
   pos++;
-  while (pos < src.length ())
+  while (pos < srclen)
     {
-      char c = src.at (pos++);
+      char c = src.at (pos);
       if (c == '"')
-        break;
+        {
+          pos++;
+          break;
+        }
 
       if (c == '\\')
         {
-          c = get_escape_character (src);
+          char c2 = src.at (pos + 1);
+          str += get_special_char (c2);
+          pos += 2;
+          continue;
         }
 
-      out.strvalue += c;
+      str += c;
+      pos++;
     }
 
-  if (out.strvalue.length () == 0)
-    {
-      out.strvalue += '\0';
-    }
-
-  return out;
+  return Token (TokenType::TOKEN_TYPE_STRING, str);
 }
 
 Token
-Lexer::process_symbol (const std::string &src)
+Lexer::process_symbol ()
 {
-  Token out{};
-  out.type = TokenType::TOKEN_TYPE_SYMBOL;
+  std::string sym{};
 
   pos++;
-  std::string buf{};
-  while (pos < src.length ())
+  char c = src.at (pos++);
+  if (c == '\\')
     {
-      char c = src.at (pos++);
-      if (c == '\'')
-        break;
-
-      if (c == '\\')
-        {
-          c = get_escape_character (src);
-        }
-
-      buf += c;
+      char c2 = src.at (pos++);
+      sym += get_special_char (c2);
+    }
+  else
+    {
+      sym += c;
     }
 
-  if (buf.length () > 1)
+  if (src.at (pos) != '\'')
     {
-      // TODO: error
-      return {};
+      // TODO: error -- unterminated character OR character is too
+      // long.
+      return Token ();
     }
-  if (buf.length () == 1)
-    {
-      out.cvalue = buf.at (0);
-    }
+  pos++;
 
-  return out;
+  return Token (TokenType::TOKEN_TYPE_SYMBOL, sym);
 }
 
-char
-Lexer::get_escape_character (const std::string &src)
+void
+Lexer::skip_c_comments ()
 {
-  if (pos >= src.length ())
+  while (pos < srclen)
     {
-      return -1;
+      char c = src.at (pos);
+      if (c == '*')
+        {
+          if (pos + 1 < srclen && src.at (pos + 1) == '/')
+            {
+              pos += 2;
+              break;
+            }
+        }
+      pos++;
     }
+}
 
-  char c = src.at (pos++);
-  switch (c)
+void
+Lexer::skip_cpp_comments ()
+{
+  while (pos < srclen)
     {
-    case 'n':
-      return '\n';
-    case 't':
-      return '\t';
-    case 'r':
-      return '\r';
-    case '\\':
-      return '\\';
-    case '\"':
-      return '\"';
-    case '0':
-      return '\0';
-    case '\'':
-      return '\'';
+      char c = src.at (pos);
+      if (c == '\n')
+        {
+          break;
+        }
+      pos++;
     }
-
-  return -1;
 }
 
 bool
 Lexer::is_identifier_start (char c) const
 {
-  return isalpha (c) || c == '$' || c == '_';
+  return isalpha (c) || c == '_' || c == '$';
 }
 
 bool
@@ -505,39 +577,29 @@ Lexer::is_identifier_char (char c) const
   return is_identifier_start (c) || isdigit (c);
 }
 
-void
-Lexer::skip_cpp_comments (const std::string &src)
+char
+Lexer::get_special_char (char c) const
 {
-  pos += 2;
-
-  while (pos < src.length ())
+  switch (c)
     {
-      char c = src.at (pos++);
-      if (c == '\n')
-        {
-          break;
-        }
+    case '0':
+      return 0;
+    case 'n':
+      return '\n';
+    case 't':
+      return '\t';
+    case 'r':
+      return '\r';
+    case '\'':
+      return '\'';
+    case '"':
+      return '"';
+    case '\\':
+      return '\\';
+
+    default:
+      // TODO: error -- unknown special character.
+      return 0;
     }
 }
-
-void
-Lexer::skip_c_comments (const std::string &src)
-{
-  pos += 2;
-
-  while (pos < src.length ())
-    {
-      char c = src.at (pos++);
-      if (c == '*')
-        {
-          // Comment end
-          if (src.at (pos) == '/')
-            {
-              pos++;
-              break;
-            }
-        }
-    }
-}
-
 }
