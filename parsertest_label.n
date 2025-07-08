@@ -1,3 +1,11 @@
 superduperlabel:
 
 superduperlabel2:
+
+return (15 - 4);
+
+if (10 - 2 == 8) {
+  return 5;
+} else if (10 - 2 == 3) {
+  return 4;
+} else return 0;

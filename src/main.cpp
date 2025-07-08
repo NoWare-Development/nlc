@@ -34,7 +34,7 @@ main (int argc, char **argv)
 
   nlc::Parser parser{};
   auto cst = parser.parse (tokens);
-  std::cout << "parsed successfully\n";
+  std::cout << cst.to_string (0) << '\n';
 
   return 0;
 }

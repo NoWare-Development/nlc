@@ -12,18 +12,31 @@ Parser::parse (const std::vector<Token> &tokens)
   tokenslen = toks.size ();
   pos = 0;
 
-  CSTNode root{};
-
+  CSTNode root (CSTNodeType::CST_NODE_TYPE_PROGRAM);
   while (pos < tokenslen)
     {
-      auto node = parse_statement ();
-      root.append (node);
+      root.append (parse_statement ());
     }
 
   return root;
 }
 
 /* ### PRIVATE ### */
+
+CSTNode
+Parser::parse_statement_list (TokenType terminator)
+{
+  CSTNode statement_list (CSTNodeType::CST_NODE_TYPE_STMTLIST);
+  while (pos < tokenslen)
+    {
+      auto cur = toks.at (pos);
+      if (cur.type == TokenType::TOKEN_TYPE_RBRACE)
+        break;
+
+      statement_list.append (parse_statement ());
+    }
+  return statement_list;
+}
 
 CSTNode
 Parser::parse_statement ()
@@ -35,42 +48,67 @@ Parser::parse_statement ()
       // TODO: implementation -- dereference
       return {};
 
+    case TokenType::TOKEN_TYPE_LBRACE:
+      {
+        pos++;
+        auto stmtlist = parse_statement_list (TokenType::TOKEN_TYPE_LBRACE);
+        pos++;
+        return stmtlist;
+      }
+
     case TokenType::TOKEN_TYPE_SEMICOL:
       // TODO: warning -- dangling semicolon
       return {};
 
     case TokenType::TOKEN_TYPE_ID:
-      if (cur.value == "if")
-        {
-          // TODO: implementation -- if statement
-          return {};
-        }
-      else if (cur.value == "else")
-        {
-          // TODO: implementation -- else and else if statements
-          return {};
-        }
-      else if (cur.value == "switch")
-        {
-          // TODO: implementation -- switch statement
-          return {};
-        }
-      else if (cur.value == "case")
-        {
-          // TODO: implementation -- case statement
-          return {};
-        }
-      else if (cur.value == "return")
-        {
-          // TODO: implementation -- return statement
-          return {};
-        }
-      return parse_identifier_statement ();
+      {
+        if (cur.value == "if")
+          {
+            return parse_if_statement ();
+          }
+        else if (cur.value == "else")
+          {
+            return parse_else_statement ();
+          }
+        else if (cur.value == "switch")
+          {
+            // TODO: implementation -- switch statement
+            return {};
+          }
+        else if (cur.value == "case")
+          {
+            // TODO: implementation -- case statement
+            return {};
+          }
+        else if (cur.value == "return")
+          {
+            return parse_return_statement ();
+          }
+        return parse_identifier_statement ();
+      }
 
     default:
       // TODO: error -- unexpected token
       return {};
     }
+}
+
+CSTNode
+Parser::parse_else_statement ()
+{
+  CSTNode else_statement (CSTNodeType::CST_NODE_TYPE_STMT_ELSE);
+  pos++;
+  else_statement.append (parse_statement ());
+  return else_statement;
+}
+
+CSTNode
+Parser::parse_return_statement ()
+{
+  pos++;
+  skip_until (TokenType::TOKEN_TYPE_SEMICOL); // TODO: parse expression
+  pos++;
+  return CSTNode (CSTNodeType::CST_NODE_TYPE_STMT_RETURN);
 }
 
 CSTNode
@@ -104,11 +142,43 @@ Parser::parse_identifier_statement ()
 }
 
 CSTNode
+Parser::parse_if_statement ()
+{
+  if (toks.at (pos + 1).type != TokenType::TOKEN_TYPE_LPAREN)
+    {
+      // TODO: error -- unexpected token
+      return {};
+    }
+
+  pos += 2;
+  skip_until (TokenType::TOKEN_TYPE_RPAREN); // TODO: parse expression
+  pos++;
+
+  CSTNode if_statement (CSTNodeType::CST_NODE_TYPE_STMT_IF);
+  auto statement = parse_statement ();
+  if_statement.append (statement);
+  return if_statement;
+}
+
+CSTNode
 Parser::parse_label_statement ()
 {
   auto name = toks.at (pos).value;
   pos += 2;
   return CSTNode (CSTNodeType::CST_NODE_TYPE_IDSTMT_LABEL, name);
+}
+
+// TODO: remove
+void
+Parser::skip_until (TokenType toktype)
+{
+  while (pos < tokenslen)
+    {
+      auto cur = toks.at (pos);
+      if (cur.type == toktype)
+        break;
+      pos++;
+    }
 }
 
 /* ### COMPARISONS ### */

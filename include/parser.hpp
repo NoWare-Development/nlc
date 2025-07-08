@@ -14,12 +14,14 @@ enum CSTNodeType
 
   CST_NODE_TYPE_PROGRAM,
 
+  CST_NODE_TYPE_STMTLIST,
+
   CST_NODE_TYPE_STMT_IF,
-  CST_NODE_TYPE_STMT_ELSE_IF,
   CST_NODE_TYPE_STMT_ELSE,
   CST_NODE_TYPE_STMT_SWITCH,
   CST_NODE_TYPE_STMT_CASE,
   CST_NODE_TYPE_STMT_DEREF,
+  CST_NODE_TYPE_STMT_RETURN,
 
   CST_NODE_TYPE_IDSTMT_VAR_ASSIGN_TO_EXPR,
   CST_NODE_TYPE_IDSTMT_VAR_ASSIGN_TO_EXPRLIST,
@@ -78,6 +80,42 @@ struct CSTNode
   append (CSTNode child)
   {
     children.push_back (child);
+  }
+
+  std::string
+  to_string (size_t depth) const
+  {
+    std::string out{};
+
+    if (depth > 0)
+      {
+        for (size_t i = 0; i < depth; i++)
+          {
+            out += "  ";
+          }
+        out += "(" + std::to_string (depth) + ") ";
+      }
+
+    out += "CSTNode {";
+
+    out += " type: ";
+    out += std::to_string (type);
+
+    if (!value.empty ())
+      {
+        out += ", value: \"";
+        out += value;
+        out += "\"";
+      }
+
+    out += " }\n";
+
+    for (auto &child : children)
+      {
+        out += child.to_string (depth + 1);
+      }
+
+    return out;
   }
 };
 
@@ -149,17 +187,26 @@ private:
   size_t pos{};
   size_t tokenslen{};
 
+  // <stmtlist>
+  //   : <stmt> <stmtlist>
+  //   | <stmt>
+  //   ;
+  CSTNode parse_statement_list (TokenType terminator
+                                = TokenType::TOKEN_TYPE_UNK);
+
   // <stmt>
   //   : <idstmt>
-  //   | if (<expr>) { <stmtlist> }
-  //   | else if (<expr>) { <stmtlist> }
-  //   | else { <stmtlist> }
+  //   | if (<expr>) <stmt>
+  //   | else <stmt>
   //   | switch { <stmtlist> }
   //   | case <expr>: { <stmtlist> }
   //   | return <expr>;
   //   | *<stmt>
+  //   | { <stmtlist> }
   //   ;
   CSTNode parse_statement ();
+  CSTNode parse_else_statement ();   // else <stmt>
+  CSTNode parse_return_statement (); // return <expr>;
 
   // <idstmt>
   //   : <idcreatestmt>
@@ -171,7 +218,11 @@ private:
   //   ;
   CSTNode parse_identifier_statement ();
 
+  CSTNode parse_if_statement ();    // if (<expr>) <stmt>
   CSTNode parse_label_statement (); // <id>:
+
+  // TODO: remove me
+  void skip_until (TokenType toktype);
 
   bool is_operator (TokenType toktype) const;
   bool is_assign_operator (TokenType toktype) const;
