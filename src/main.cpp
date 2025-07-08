@@ -31,6 +31,7 @@ main (int argc, char **argv)
     {
       std::cout << tok.to_string () << '\n';
     }
+  std::cout << '\n';
 
   nlc::Parser parser{};
   auto cst = parser.parse (tokens);
