@@ -19,7 +19,6 @@ enum CSTNodeType
   CST_NODE_TYPE_STMT_IF,
   CST_NODE_TYPE_STMT_ELSE,
   CST_NODE_TYPE_STMT_SWITCH,
-  CST_NODE_TYPE_STMT_CASE,
   CST_NODE_TYPE_STMT_DEREF,
   CST_NODE_TYPE_STMT_RETURN,
 
@@ -29,6 +28,9 @@ enum CSTNodeType
   CST_NODE_TYPE_IDSTMT_ELEM_ASSIGN_TO_EXPRLIST,
   CST_NODE_TYPE_IDSTMT_CALL,
   CST_NODE_TYPE_IDSTMT_LABEL,
+
+  CST_NODE_TYPE_CASESTMT_CASE,
+  CST_NODE_TYPE_CASESTMT_DEFAULT,
 
   CST_NODE_TYPE_EXPR,
 
@@ -82,41 +84,7 @@ struct CSTNode
     children.push_back (child);
   }
 
-  std::string
-  to_string (size_t depth) const
-  {
-    std::string out{};
-
-    if (depth > 0)
-      {
-        for (size_t i = 0; i < depth; i++)
-          {
-            out += "  ";
-          }
-        out += "(" + std::to_string (depth) + ") ";
-      }
-
-    out += "CSTNode {";
-
-    out += " type: ";
-    out += std::to_string (type);
-
-    if (!value.empty ())
-      {
-        out += ", value: \"";
-        out += value;
-        out += "\"";
-      }
-
-    out += " }\n";
-
-    for (auto &child : children)
-      {
-        out += child.to_string (depth + 1);
-      }
-
-    return out;
-  }
+  std::string to_string (size_t depth) const;
 };
 
 class Parser
@@ -191,21 +159,21 @@ private:
   //   : <stmt> <stmtlist>
   //   | <stmt>
   //   ;
-  CSTNode parse_statement_list (TokenType terminator
-                                = TokenType::TOKEN_TYPE_UNK);
+  CSTNode parse_statement_list ();
 
   // <stmt>
   //   : <idstmt>
   //   | if (<expr>) <stmt>
   //   | else <stmt>
-  //   | switch { <stmtlist> }
-  //   | case <expr>: { <stmtlist> }
+  //   | switch { <casestmts> }
   //   | return <expr>;
   //   | *<stmt>
   //   | { <stmtlist> }
   //   ;
   CSTNode parse_statement ();
+  CSTNode parse_if_statement ();     // if (<expr>) <stmt>
   CSTNode parse_else_statement ();   // else <stmt>
+  CSTNode parse_switch_statement (); // switch { <casestmts> }
   CSTNode parse_return_statement (); // return <expr>;
 
   // <idstmt>
@@ -218,7 +186,12 @@ private:
   //   ;
   CSTNode parse_identifier_statement ();
 
-  CSTNode parse_if_statement ();    // if (<expr>) <stmt>
+  // <casestmt>
+  //   : case <expr>: { <stmtlist> }
+  //   | default: { <stmtlist> }
+  //   ;
+  CSTNode parse_case_statement ();
+
   CSTNode parse_label_statement (); // <id>:
 
   // TODO: remove me

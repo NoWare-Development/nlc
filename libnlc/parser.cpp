@@ -1,4 +1,5 @@
 #include "parser.hpp"
+#include <iostream>
 
 namespace nlc
 {
@@ -24,7 +25,7 @@ Parser::parse (const std::vector<Token> &tokens)
 /* ### PRIVATE ### */
 
 CSTNode
-Parser::parse_statement_list (TokenType terminator)
+Parser::parse_statement_list ()
 {
   CSTNode statement_list (CSTNodeType::CST_NODE_TYPE_STMTLIST);
   while (pos < tokenslen)
@@ -51,7 +52,7 @@ Parser::parse_statement ()
     case TokenType::TOKEN_TYPE_LBRACE:
       {
         pos++;
-        auto stmtlist = parse_statement_list (TokenType::TOKEN_TYPE_LBRACE);
+        auto stmtlist = parse_statement_list ();
         pos++;
         return stmtlist;
       }
@@ -72,13 +73,7 @@ Parser::parse_statement ()
           }
         else if (cur.value == "switch")
           {
-            // TODO: implementation -- switch statement
-            return {};
-          }
-        else if (cur.value == "case")
-          {
-            // TODO: implementation -- case statement
-            return {};
+            return parse_switch_statement ();
           }
         else if (cur.value == "return")
           {
@@ -94,12 +89,67 @@ Parser::parse_statement ()
 }
 
 CSTNode
+Parser::parse_if_statement ()
+{
+  if (toks.at (pos + 1).type != TokenType::TOKEN_TYPE_LPAREN)
+    {
+      // TODO: error -- unexpected token
+      return {};
+    }
+
+  pos += 2;
+  skip_until (TokenType::TOKEN_TYPE_RPAREN); // TODO: parse expression
+  pos++;
+
+  CSTNode if_statement (CSTNodeType::CST_NODE_TYPE_STMT_IF);
+  auto statement = parse_statement ();
+  if_statement.append (statement);
+  return if_statement;
+}
+
+CSTNode
 Parser::parse_else_statement ()
 {
   CSTNode else_statement (CSTNodeType::CST_NODE_TYPE_STMT_ELSE);
   pos++;
   else_statement.append (parse_statement ());
   return else_statement;
+}
+
+CSTNode
+Parser::parse_switch_statement ()
+{
+  if (toks.at (pos + 1).type != TokenType::TOKEN_TYPE_LPAREN)
+    {
+      // TODO: error -- unexpected token
+      return {};
+    }
+
+  pos += 2;
+  skip_until (TokenType::TOKEN_TYPE_RPAREN); // TODO: parse expression
+  pos++;
+
+  if (toks.at (pos).type != TokenType::TOKEN_TYPE_LBRACE)
+    {
+      // TODO: error -- unexpected token
+      return {};
+    }
+  pos++;
+
+  CSTNode switch_statement (CSTNodeType::CST_NODE_TYPE_STMT_SWITCH);
+  while (pos < tokenslen)
+    {
+      auto tok = toks.at (pos);
+      if (tok.type == TokenType::TOKEN_TYPE_RBRACE)
+        {
+          break;
+        }
+
+      switch_statement.append (parse_case_statement ());
+    }
+  pos++;
+
+  return switch_statement;
 }
 
 CSTNode
@@ -142,22 +192,67 @@ Parser::parse_identifier_statement ()
 }
 
 CSTNode
-Parser::parse_if_statement ()
+Parser::parse_case_statement ()
 {
-  if (toks.at (pos + 1).type != TokenType::TOKEN_TYPE_LPAREN)
+  auto cur = toks.at (pos);
+  if (cur.type != TokenType::TOKEN_TYPE_ID)
     {
       // TODO: error -- unexpected token
       return {};
     }
 
-  pos += 2;
-  skip_until (TokenType::TOKEN_TYPE_RPAREN); // TODO: parse expression
+  CSTNodeType type{};
+  // TODO: parse expression
+
+  // CSTNode expression{};
+  if (cur.value == "case")
+    {
+      // _case <expr>_: { <stmtlist> }
+      type = CSTNodeType::CST_NODE_TYPE_CASESTMT_CASE;
+      pos++;
+      // expression = parse_expression();
+      skip_until (TokenType::TOKEN_TYPE_COLON);
+    }
+  else if (cur.value == "default")
+    {
+      // _default_: { <stmtlist> }
+      type = CSTNodeType::CST_NODE_TYPE_CASESTMT_DEFAULT;
+      pos++;
+    }
+  else
+    {
+      // TODO: error -- unexpected token
+      return {};
+    }
+
+  cur = toks.at (pos);
+  if (cur.type != TokenType::TOKEN_TYPE_COLON)
+    {
+      // TODO: error -- unexpected token
+      return {};
+    }
   pos++;
 
-  CSTNode if_statement (CSTNodeType::CST_NODE_TYPE_STMT_IF);
-  auto statement = parse_statement ();
-  if_statement.append (statement);
-  return if_statement;
+  cur = toks.at (pos);
+  if (cur.type != TokenType::TOKEN_TYPE_LBRACE)
+    {
+      // TODO: error -- unexpected token
+      return {};
+    }
+  pos++;
+
+  auto statement_list = parse_statement_list ();
+  pos++;
+
+  CSTNode case_statement (type);
+  // TODO: parse expression
+  // if (type == CSTNodeType::CST_NODE_TYPE_CASESTMT_CASE)
+  //   {
+  //     case_statement.append(expression);
+  //   }
+  case_statement.append (statement_list);
+
+  return case_statement;
 }
 
 CSTNode
