@@ -323,6 +323,12 @@ Lexer::tokenize (const std::string &src)
             out.emplace_back (TokenType::TOKEN_TYPE_PERIOD);
           }
           break;
+
+        case '?':
+          {
+            out.emplace_back (TokenType::TOKEN_TYPE_QUEMARK);
+          }
+          break;
         }
 
       pos++;

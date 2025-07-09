@@ -39,6 +39,7 @@ enum TokenType
   TOKEN_TYPE_SEMICOL,
   TOKEN_TYPE_COMMA,
   TOKEN_TYPE_PERIOD,
+  TOKEN_TYPE_QUEMARK,
 
   TOKEN_TYPE_PLUS_EQ,
   TOKEN_TYPE_MINUS_EQ,
@@ -72,22 +73,7 @@ public:
   {
   }
 
-  std::string
-  to_string () const
-  {
-    std::string out = "Token {";
-
-    out += " type: ";
-    out += std::to_string (type);
-
-    out += ", value: \"";
-    out += value;
-    out += "\"";
-
-    out += " }";
-
-    return out;
-  }
+  std::string to_string () const;
 };
 
 class Lexer
