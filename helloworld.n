@@ -1,19 +1,39 @@
 import std.io;
 
-int main(int argc, char **argv) {
-  println("\tHello, World!\r"); // "<tab> Hello, World! <carriage return>"
-  char newline = '\n';
+typedef uchar unsigned_char;
 
-  int test = 5;
-  float testf = 5.5f;
+enum MyEnum {
+  MY_ENUM_TEST1,
+  MY_ENUM_TEST2,
+  MY_ENUM_TEST3,
+};
 
-  char chars_array[5000] = { 'H', 'e', 'l', 'l', 'o', '!', '\n' };
-  print(chars_array); // "Hello! <newline>"
+struct MyStruct {
+  var_1: int = 5;
+  var_2: string;
+  var_3: unsigned_char;
 
-  chars_array[1] = 'i';
-  chars_array[2] = '!';
-  chars_array[3] = 0;
-  println(chars_array); // "Hi!"
+  initialize :: (v1: int, v2: string, v3: unsigned_char) -> bool {
+    var_1 = v1;
+    var_2 = v2;
+    var_3 = v3;
+
+    return var_1 < 0 ? false : true;
+  }
+
+  // This method will be required by `std.fmt.format()` to format this structure
+  // If this method is implemented, this structure can be directly passed to
+  // functions like `std.io.println()`, `std.fmt.format()`, etc.
+  to_string :: () -> string {
+    return std.fmt.format("MyStruct { {} {} {} }",
+                          var_1, var_2, var_3);
+  }
+};
+
+main :: (argc: int, argv: char *) -> int {
+  MyStruct structure{};
+
+  println("{}", structure);
 
   return 0;
 }

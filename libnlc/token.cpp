@@ -124,6 +124,8 @@ tokentype_to_string (TokenType type)
       return "PIPE_PIPE";
     case TokenType::TOKEN_TYPE_AMPERSAND_AMPERSAND:
       return "AMPERSAND_AMPERSAND";
+    case TokenType::TOKEN_TYPE_COLON_COLON:
+      return "COLON_COLON";
     default:
       return {};
     }

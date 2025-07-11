@@ -305,6 +305,12 @@ Lexer::tokenize (const std::string &src)
 
         case ':':
           {
+            if (src.at (pos + 1) == ':')
+              {
+                out.emplace_back (TokenType::TOKEN_TYPE_COLON_COLON);
+                pos += 2;
+                continue;
+              }
             out.emplace_back (TokenType::TOKEN_TYPE_COLON);
           }
           break;
