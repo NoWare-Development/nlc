@@ -22,6 +22,8 @@ enum CSTNodeType : unsigned char
   CST_NODE_TYPE_STMT_RETURN = 0b0001'0100,
   CST_NODE_TYPE_STMT_BREAK = 0b0001'0101,
   CST_NODE_TYPE_STMT_CONTINUE = 0b0001'0110,
+  CST_NODE_TYPE_STMT_WHILE = 0b0001'0111,
+  CST_NODE_TYPE_STMT_FOR = 0b0001'1000,
 
   CST_NODE_TYPE_IDSTMT_VAR_ASSIGN_TO_EXPR = 0b0010'0000,
   CST_NODE_TYPE_IDSTMT_VAR_ASSIGN_TO_EXPRLIST = 0b0010'0001,
@@ -202,12 +204,16 @@ private:
   //   | { <stmtlist> }
   //   | break;
   //   | continue;
+  //   | while (<expr>) <stmt>
+  //   | for (<stmt>; <expr>; <expr>) <stmt>
   //   ;
   CSTNode parse_statement ();
   CSTNode parse_if_statement ();     // if (<expr>) <stmt>
   CSTNode parse_else_statement ();   // else <stmt>
   CSTNode parse_switch_statement (); // switch { <casestmts> }
   CSTNode parse_return_statement (); // return <expr>;
+  CSTNode parse_while_statement ();  // while (<expr>) <stmt>
+  CSTNode parse_for_statement ();    // for (<stmt>; <expr>; <expr>) <stmt>
 
   // <idstmt>
   //   : <idcreatestmt>

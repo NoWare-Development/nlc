@@ -84,6 +84,8 @@ cstnodetype_to_string (CSTNodeType type)
         "RETURN",
         "BREAK",
         "CONTINUE",
+        "WHILE",
+        "FOR",
     },
     {
         // IDSTMT

@@ -20,6 +20,7 @@ Parser::parse (const std::vector<Token> &tokens)
       auto node = parse_statement ();
       if (node.type == CSTNodeType::CST_NODE_TYPE_UNK)
         {
+          // TODO: proper error handling
           std::cout << "Something went wrong, pos is " << pos << '\n';
           std::cout << "Errored token is " << toks.at (pos).to_string ()
                     << '\n';
@@ -127,6 +128,14 @@ Parser::parse_statement ()
             pos += 2;
             return CSTNode (CSTNodeType::CST_NODE_TYPE_STMT_CONTINUE);
           }
+        else if (cur.value == "while")
+          {
+            return parse_while_statement ();
+          }
+        else if (cur.value == "for")
+          {
+            return parse_for_statement ();
+          }
         return parse_identifier_statement ();
       }
 
@@ -205,8 +214,11 @@ Parser::parse_return_statement ()
 {
   CSTNode return_statement (CSTNodeType::CST_NODE_TYPE_STMT_RETURN);
   pos++;
-  // skip_until (TokenType::TOKEN_TYPE_SEMICOL); // TODO: parse expression
-  return_statement.append (parse_expression ());
+  skip_until (TokenType::TOKEN_TYPE_SEMICOL);
+
+  // TODO: enable when expressions are ready and comment line above.
+  // return_statement.append (parse_expression ());
+
   if (toks.at (pos).type != TokenType::TOKEN_TYPE_SEMICOL)
     {
       // TODO: error -- unexpected token
@@ -214,6 +226,102 @@ Parser::parse_return_statement ()
     }
   pos++;
   return return_statement;
+}
+
+CSTNode
+Parser::parse_while_statement ()
+{
+  CSTNode while_statement (CSTNodeType::CST_NODE_TYPE_STMT_WHILE);
+  pos++;
+
+  if (pos >= tokenslen)
+    {
+      // TODO: error -- expected token
+      return {};
+    }
+
+  auto cur = toks.at (pos);
+  if (cur.type != TokenType::TOKEN_TYPE_LPAREN)
+    {
+      // TODO: error -- unexpected token
+      return {};
+    }
+  pos++;
+
+  skip_until (TokenType::TOKEN_TYPE_RPAREN); // TODO: parse expression
+  cur = toks.at (pos);
+  if (cur.type != TokenType::TOKEN_TYPE_RPAREN)
+    {
+      // TODO: error -- unexpected token
+      return {};
+    }
+  pos++;
+
+  if (pos >= tokenslen)
+    {
+      // TODO: error -- expected token
+      return {};
+    }
+
+  while_statement.append (parse_statement ());
+  return while_statement;
+}
+
+CSTNode
+Parser::parse_for_statement ()
+{
+  CSTNode for_statement (CSTNodeType::CST_NODE_TYPE_STMT_FOR);
+  pos++;
+  if (pos >= tokenslen)
+    {
+      std::cout << "ERR 1\n";
+      // TODO: error -- expected token
+      return {};
+    }
+
+  auto cur = toks.at (pos);
+  if (cur.type != TokenType::TOKEN_TYPE_LPAREN)
+    {
+      std::cout << "ERR 2\n";
+      // TODO: error -- unexpected token
+      return {};
+    }
+  pos++;
+  if (pos >= tokenslen)
+    {
+      std::cout << "ERR 3\n";
+      // TODO: error -- expected token
+      return {};
+    }
+
+  // TODO: parse <stmt>;<expr>;<expr>
+  skip_until (TokenType::TOKEN_TYPE_RPAREN);
+  if (pos >= tokenslen)
+    {
+      std::cout << "ERR 4\n";
+      // TODO: error -- expected token
+      return {};
+    }
+  cur = toks.at (pos);
+  if (cur.type != TokenType::TOKEN_TYPE_RPAREN)
+    {
+      std::cout << "ERR 5\n";
+      // TODO: error -- unexpected token
+      return {};
+    }
+
+  pos++;
+  if (pos >= tokenslen)
+    {
+      std::cout << "ERR 6\n";
+      // TODO: error -- expected token
+      return {};
+    }
+
+  auto statement = parse_statement ();
+
+  for_statement.append (statement);
+  return for_statement;
 }
 
 CSTNode

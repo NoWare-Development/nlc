@@ -23,3 +23,15 @@ default: { return 4; }
 
 break;
 continue;
+
+while () {
+  if () {
+    return 0;
+  }
+}
+
+for (;;) {
+  if () {
+    return 1;
+  }
+}
