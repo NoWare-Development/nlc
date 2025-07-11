@@ -27,15 +27,15 @@ main (int argc, char **argv)
 
   nlc::Lexer lexer{};
   auto tokens = lexer.tokenize (src);
-  for (auto &tok : tokens)
+  for (size_t i = 0; i < tokens.size (); i++)
     {
-      std::cout << tok.to_string () << '\n';
+      std::cout << '[' << i << "] " << tokens.at (i).to_string () << '\n';
     }
   std::cout << '\n';
 
   nlc::Parser parser{};
   auto cst = parser.parse (tokens);
-  std::cout << cst.to_string (0) << '\n';
+  std::cout << cst.to_string () << '\n';
 
   return 0;
 }

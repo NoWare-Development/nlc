@@ -1,4 +1,5 @@
 #include "parser.hpp"
+#include "lexer.hpp"
 #include <iostream>
 
 namespace nlc
@@ -16,7 +17,15 @@ Parser::parse (const std::vector<Token> &tokens)
   CSTNode root (CSTNodeType::CST_NODE_TYPE_PROGRAM);
   while (pos < tokenslen)
     {
-      root.append (parse_statement ());
+      auto node = parse_statement ();
+      if (node.type == CSTNodeType::CST_NODE_TYPE_UNK)
+        {
+          std::cout << "Something went wrong, pos is " << pos << '\n';
+          std::cout << "Errored token is " << toks.at (pos).to_string ()
+                    << '\n';
+          break;
+        }
+      root.append (node);
     }
 
   return root;
@@ -32,7 +41,9 @@ Parser::parse_statement_list ()
     {
       auto cur = toks.at (pos);
       if (cur.type == TokenType::TOKEN_TYPE_RBRACE)
-        break;
+        {
+          break;
+        }
 
       statement_list.append (parse_statement ());
     }
@@ -42,6 +53,13 @@ Parser::parse_statement_list ()
 CSTNode
 Parser::parse_statement ()
 {
+  if (pos >= tokenslen)
+    {
+      std::cout << "ERROR: bad statement, position (" << pos
+                << ") is out of bounds\n";
+      return {};
+    }
+
   auto cur = toks.at (pos);
   switch (cur.type)
     {
@@ -53,6 +71,12 @@ Parser::parse_statement ()
       {
         pos++;
         auto stmtlist = parse_statement_list ();
+        auto cur = toks.at (pos);
+        if (cur.type != TokenType::TOKEN_TYPE_RBRACE)
+          {
+            // TODO: error -- unexpected token
+            return {};
+          }
         pos++;
         return stmtlist;
       }
@@ -79,6 +103,30 @@ Parser::parse_statement ()
           {
             return parse_return_statement ();
           }
+        else if (cur.value == "break")
+          {
+            if (pos + 1 >= tokenslen
+                || toks.at (pos + 1).type != TokenType::TOKEN_TYPE_SEMICOL)
+              {
+                // TODO: error -- unexpected token
+                return {};
+              }
+
+            pos += 2;
+            return CSTNode (CSTNodeType::CST_NODE_TYPE_STMT_BREAK);
+          }
+        else if (cur.value == "continue")
+          {
+            if (pos + 1 >= tokenslen
+                || toks.at (pos + 1).type != TokenType::TOKEN_TYPE_SEMICOL)
+              {
+                // TODO: error -- unexpected token
+                return {};
+              }
+
+            pos += 2;
+            return CSTNode (CSTNodeType::CST_NODE_TYPE_STMT_CONTINUE);
+          }
         return parse_identifier_statement ();
       }
 
@@ -91,6 +139,8 @@ Parser::parse_statement ()
 CSTNode
 Parser::parse_if_statement ()
 {
+  CSTNode if_statement (CSTNodeType::CST_NODE_TYPE_STMT_IF);
+
   if (toks.at (pos + 1).type != TokenType::TOKEN_TYPE_LPAREN)
     {
       // TODO: error -- unexpected token
@@ -101,9 +151,7 @@ Parser::parse_if_statement ()
   skip_until (TokenType::TOKEN_TYPE_RPAREN); // TODO: parse expression
   pos++;
 
-  CSTNode if_statement (CSTNodeType::CST_NODE_TYPE_STMT_IF);
-  auto statement = parse_statement ();
-  if_statement.append (statement);
+  if_statement.append (parse_statement ());
   return if_statement;
 }
 
@@ -155,10 +203,17 @@ Parser::parse_switch_statement ()
 CSTNode
 Parser::parse_return_statement ()
 {
+  CSTNode return_statement (CSTNodeType::CST_NODE_TYPE_STMT_RETURN);
   pos++;
-  skip_until (TokenType::TOKEN_TYPE_SEMICOL); // TODO: parse expression
+  // skip_until (TokenType::TOKEN_TYPE_SEMICOL); // TODO: parse expression
+  return_statement.append (parse_expression ());
+  if (toks.at (pos).type != TokenType::TOKEN_TYPE_SEMICOL)
+    {
+      // TODO: error -- unexpected token
+      return {};
+    }
   pos++;
-  return CSTNode (CSTNodeType::CST_NODE_TYPE_STMT_RETURN);
+  return return_statement;
 }
 
 CSTNode
@@ -256,6 +311,159 @@ Parser::parse_case_statement ()
 }
 
 CSTNode
+Parser::parse_expression ()
+{
+  CSTNode expression (CSTNodeType::CST_NODE_TYPE_EXPR);
+
+  TokenType prev_type{};
+  while (pos < tokenslen)
+    {
+      auto cur = toks.at (pos);
+
+      // TODO: add more checks about context to infer that output expression
+      // CST is ready to become AST.
+
+      if (cur.type == TokenType::TOKEN_TYPE_LPAREN)
+        {
+          pos++;
+          auto nested_expr = parse_expression ();
+          cur = toks.at (pos);
+          if (cur.type != TokenType::TOKEN_TYPE_RPAREN)
+            {
+              // TODO: error -- unexpected token.
+              return {};
+            }
+          pos++;
+
+          prev_type = cur.type;
+          expression.append (nested_expr);
+          continue;
+        }
+
+      if (is_operand (cur.type))
+        {
+          expression.append (parse_operand ());
+          continue;
+        }
+
+      if (cur.type == TokenType::TOKEN_TYPE_MINUS)
+        {
+          if (is_operator (prev_type))
+            {
+              prev_type = cur.type;
+              expression.append (CSTNode (prefix_operators.at (cur.type)));
+              pos++;
+              continue;
+            }
+
+          prev_type = cur.type;
+          expression.append (CSTNode (operators.at (cur.type)));
+          pos++;
+          continue;
+        }
+
+      if (is_operator (cur.type))
+        {
+          prev_type = cur.type;
+          expression.append (CSTNode (operators.at (cur.type)));
+          pos++;
+          continue;
+        }
+
+      if (is_prefix_operator (cur.type))
+        {
+          prev_type = cur.type;
+          expression.append (CSTNode (prefix_operators.at (cur.type)));
+          pos++;
+          continue;
+        }
+
+      if (is_compare_operator (cur.type))
+        {
+          prev_type = cur.type;
+          expression.append (CSTNode (compare_operators.at (cur.type)));
+          pos++;
+          continue;
+        }
+
+      // End of expression
+      break;
+    }
+  return expression;
+}
+
+CSTNode
+Parser::parse_operand ()
+{
+  auto cur = toks.at (pos);
+  switch (cur.type)
+    {
+    case TokenType::TOKEN_TYPE_NUMBER:
+      pos++;
+      return CSTNode (CSTNodeType::CST_NODE_TYPE_OPERAND_INTEGER, cur.value);
+
+    case TokenType::TOKEN_TYPE_FLOATING:
+      pos++;
+      return CSTNode (CSTNodeType::CST_NODE_TYPE_OPERAND_FLOATING, cur.value);
+
+    default:
+      return parse_idoperand ();
+    }
+}
+
+CSTNode
+Parser::parse_idoperand ()
+{
+  // FIXME: I have thoughts that it would probably not go that well with how I
+  // do it now. It will probably fail in more complex cases. I think for now it
+  // is OK, but should be fixed later.
+
+  CSTNode idoperand (CSTNodeType::CST_NODE_TYPE_OPERAND_ID);
+
+  auto first = toks.at (pos);
+  if (is_pre_operator (first.type))
+    {
+      idoperand.append (CSTNode (pre_operators.at (first.type)));
+
+      if (pos + 1 >= tokenslen)
+        {
+          // TODO: error -- expected token
+          return {};
+        }
+      auto second = toks.at (pos + 1);
+      if (second.type != TokenType::TOKEN_TYPE_ID)
+        {
+          // TODO: error -- unexpected token
+          return {};
+        }
+      pos += 2;
+
+      idoperand.value = second.value;
+      return idoperand;
+    }
+  else if (first.type == TokenType::TOKEN_TYPE_ID)
+    {
+      idoperand.value = first.value;
+      if (pos + 1 < tokenslen)
+        {
+          auto second = toks.at (pos + 1);
+          if (is_post_operator (second.type))
+            {
+              // Has post operand
+              idoperand.append (CSTNode (post_operators.at (second.type)));
+              pos += 2;
+              return idoperand;
+            }
+        }
+      pos++;
+      return idoperand;
+    }
+
+  // TODO: error -- unexpected token
+  return {};
+}
+
+CSTNode
 Parser::parse_label_statement ()
 {
   auto name = toks.at (pos).value;
@@ -285,6 +493,12 @@ Parser::is_operator (TokenType toktype) const
 }
 
 bool
+Parser::is_prefix_operator (TokenType toktype) const
+{
+  return prefix_operators.find (toktype) != prefix_operators.end ();
+}
+
+bool
 Parser::is_assign_operator (TokenType toktype) const
 {
   return assign_operators.find (toktype) != assign_operators.end ();
@@ -303,6 +517,18 @@ Parser::is_boolean_operator (TokenType toktype) const
 }
 
 bool
+Parser::is_pre_operator (TokenType toktype) const
+{
+  return pre_operators.find (toktype) != pre_operators.end ();
+}
+
+bool
+Parser::is_post_operator (TokenType toktype) const
+{
+  return post_operators.find (toktype) != post_operators.end ();
+}
+
+bool
 Parser::is_keyword (const std::string &str) const
 {
   for (auto &kw : keywords)
@@ -311,6 +537,21 @@ Parser::is_keyword (const std::string &str) const
         return true;
     }
   return false;
+}
+
+bool
+Parser::is_operand (TokenType toktype) const
+{
+  return is_idoperand (toktype) || toktype == TokenType::TOKEN_TYPE_NUMBER
+         || toktype == TokenType::TOKEN_TYPE_FLOATING;
+}
+
+bool
+Parser::is_idoperand (TokenType toktype) const
+{
+  return toktype == TokenType::TOKEN_TYPE_ID
+         || toktype == TokenType::TOKEN_TYPE_PLUS_PLUS
+         || toktype == TokenType::TOKEN_TYPE_MINUS_MINUS;
 }
 
 }

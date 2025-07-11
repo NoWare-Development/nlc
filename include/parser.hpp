@@ -8,62 +8,73 @@
 namespace nlc
 {
 
-enum CSTNodeType
+enum CSTNodeType : unsigned char
 {
-  CST_NODE_TYPE_UNK = 0,
+  CST_NODE_TYPE_UNK = 0b0000'0000,
+  CST_NODE_TYPE_PROGRAM = 0b0000'0001,
+  CST_NODE_TYPE_STMTLIST = 0b0000'0010,
+  CST_NODE_TYPE_EXPR = 0b0000'0011,
 
-  CST_NODE_TYPE_PROGRAM,
+  CST_NODE_TYPE_STMT_IF = 0b0001'0000,
+  CST_NODE_TYPE_STMT_ELSE = 0b0001'0001,
+  CST_NODE_TYPE_STMT_SWITCH = 0b0001'0010,
+  CST_NODE_TYPE_STMT_DEREF = 0b0001'0011,
+  CST_NODE_TYPE_STMT_RETURN = 0b0001'0100,
+  CST_NODE_TYPE_STMT_BREAK = 0b0001'0101,
+  CST_NODE_TYPE_STMT_CONTINUE = 0b0001'0110,
 
-  CST_NODE_TYPE_STMTLIST,
+  CST_NODE_TYPE_IDSTMT_VAR_ASSIGN_TO_EXPR = 0b0010'0000,
+  CST_NODE_TYPE_IDSTMT_VAR_ASSIGN_TO_EXPRLIST = 0b0010'0001,
+  CST_NODE_TYPE_IDSTMT_ELEM_ASSIGN_TO_EXPR = 0b0010'0010,
+  CST_NODE_TYPE_IDSTMT_ELEM_ASSIGN_TO_EXPRLIST = 0b0010'0011,
+  CST_NODE_TYPE_IDSTMT_CALL = 0b0010'0100,
+  CST_NODE_TYPE_IDSTMT_LABEL = 0b0010'0101,
 
-  CST_NODE_TYPE_STMT_IF,
-  CST_NODE_TYPE_STMT_ELSE,
-  CST_NODE_TYPE_STMT_SWITCH,
-  CST_NODE_TYPE_STMT_DEREF,
-  CST_NODE_TYPE_STMT_RETURN,
+  CST_NODE_TYPE_CASESTMT_CASE = 0b0011'0000,
+  CST_NODE_TYPE_CASESTMT_DEFAULT = 0b0011'0001,
 
-  CST_NODE_TYPE_IDSTMT_VAR_ASSIGN_TO_EXPR,
-  CST_NODE_TYPE_IDSTMT_VAR_ASSIGN_TO_EXPRLIST,
-  CST_NODE_TYPE_IDSTMT_ELEM_ASSIGN_TO_EXPR,
-  CST_NODE_TYPE_IDSTMT_ELEM_ASSIGN_TO_EXPRLIST,
-  CST_NODE_TYPE_IDSTMT_CALL,
-  CST_NODE_TYPE_IDSTMT_LABEL,
+  CST_NODE_TYPE_OP_ADD = 0b0100'0000,
+  CST_NODE_TYPE_OP_SUB = 0b0100'0001,
+  CST_NODE_TYPE_OP_MUL = 0b0100'0010,
+  CST_NODE_TYPE_OP_DIV = 0b0100'0011,
+  CST_NODE_TYPE_OP_MOD = 0b0100'0100,
+  CST_NODE_TYPE_OP_AND = 0b0100'0101,
+  CST_NODE_TYPE_OP_OR = 0b0100'0110,
+  CST_NODE_TYPE_OP_XOR = 0b0100'0111,
 
-  CST_NODE_TYPE_CASESTMT_CASE,
-  CST_NODE_TYPE_CASESTMT_DEFAULT,
+  CST_NODE_TYPE_PREFIXOP_BOOLNOT = 0b0101'0000,
+  CST_NODE_TYPE_PREFIXOP_MINUS = 0b0101'0001,
+  CST_NODE_TYPE_PREFIXOP_NOT = 0b0101'0010,
 
-  CST_NODE_TYPE_EXPR,
+  CST_NODE_TYPE_ASSIGNOP_EQUAL = 0b0110'0000,
+  CST_NODE_TYPE_ASSIGNOP_ADD_EQ = 0b0110'0001,
+  CST_NODE_TYPE_ASSIGNOP_SUB_EQ = 0b0110'0010,
+  CST_NODE_TYPE_ASSIGNOP_MUL_EQ = 0b0110'0011,
+  CST_NODE_TYPE_ASSIGNOP_DIV_EQ = 0b0110'0100,
+  CST_NODE_TYPE_ASSIGNOP_MOD_EQ = 0b0110'0101,
+  CST_NODE_TYPE_ASSIGNOP_AND_EQ = 0b0110'0110,
+  CST_NODE_TYPE_ASSIGNOP_OR_EQ = 0b0110'0111,
+  CST_NODE_TYPE_ASSIGNOP_XOR_EQ = 0b0110'1000,
 
-  CST_NODE_TYPE_OP_ADD,
-  CST_NODE_TYPE_OP_SUB,
-  CST_NODE_TYPE_OP_MUL,
-  CST_NODE_TYPE_OP_DIV,
-  CST_NODE_TYPE_OP_MOD,
-  CST_NODE_TYPE_OP_AND,
-  CST_NODE_TYPE_OP_OR,
-  CST_NODE_TYPE_OP_XOR,
-  CST_NODE_TYPE_OP_BOOLNOT,
-  CST_NODE_TYPE_OP_NOT,
+  CST_NODE_TYPE_CMPOP_EQUAL = 0b0111'0000,
+  CST_NODE_TYPE_CMPOP_NOT_EQUAL = 0b0111'0001,
+  CST_NODE_TYPE_CMPOP_LESS = 0b0111'0010,
+  CST_NODE_TYPE_CMPOP_GREATER = 0b0111'0011,
+  CST_NODE_TYPE_CMPOP_LESS_OR_EQUAL = 0b0111'0100,
+  CST_NODE_TYPE_CMPOP_GREATER_OR_EQUAL = 0b0111'0101,
 
-  CST_NODE_TYPE_ASSIGNOP_EQUAL,
-  CST_NODE_TYPE_ASSIGNOP_ADD_EQ,
-  CST_NODE_TYPE_ASSIGNOP_SUB_EQ,
-  CST_NODE_TYPE_ASSIGNOP_MUL_EQ,
-  CST_NODE_TYPE_ASSIGNOP_DIV_EQ,
-  CST_NODE_TYPE_ASSIGNOP_MOD_EQ,
-  CST_NODE_TYPE_ASSIGNOP_AND_EQ,
-  CST_NODE_TYPE_ASSIGNOP_OR_EQ,
-  CST_NODE_TYPE_ASSIGNOP_XOR_EQ,
+  CST_NODE_TYPE_BOOLOP_AND = 0b1000'0000,
+  CST_NODE_TYPE_BOOLOP_OR = 0b1000'0001,
 
-  CST_NODE_TYPE_CMPOP_EQUAL,
-  CST_NODE_TYPE_CMPOP_NOT_EQUAL,
-  CST_NODE_TYPE_CMPOP_LESS,
-  CST_NODE_TYPE_CMPOP_GREATER,
-  CST_NODE_TYPE_CMPOP_LESS_OR_EQUAL,
-  CST_NODE_TYPE_CMPOP_GREATER_OR_EQUAL,
+  CST_NODE_TYPE_PREOP_INCREMENT = 0b1001'0000,
+  CST_NODE_TYPE_PREOP_DECREMENT = 0b1001'0001,
 
-  CST_NODE_TYPE_BOOLOP_AND,
-  CST_NODE_TYPE_BOOLOP_OR,
+  CST_NODE_TYPE_POSTOP_INCREMENT = 0b1010'0000,
+  CST_NODE_TYPE_POSTOP_DECREMENT = 0b1010'0001,
+
+  CST_NODE_TYPE_OPERAND_INTEGER = 0b1011'0000,
+  CST_NODE_TYPE_OPERAND_FLOATING = 0b1011'0001,
+  CST_NODE_TYPE_OPERAND_ID = 0b1011'0010,
 };
 
 struct CSTNode
@@ -78,13 +89,14 @@ struct CSTNode
   {
   }
 
-  void
-  append (CSTNode child)
-  {
-    children.push_back (child);
-  }
+  void append (CSTNode child);
 
-  std::string to_string (size_t depth) const;
+  std::string to_string () const;
+
+private:
+  size_t depth{ 0 };
+
+  void change_depth (size_t depth);
 };
 
 class Parser
@@ -103,8 +115,13 @@ private:
     { TokenType::TOKEN_TYPE_AMPERSAND, CSTNodeType::CST_NODE_TYPE_OP_AND },
     { TokenType::TOKEN_TYPE_PIPE, CSTNodeType::CST_NODE_TYPE_OP_OR },
     { TokenType::TOKEN_TYPE_CACCENT, CSTNodeType::CST_NODE_TYPE_OP_XOR },
-    { TokenType::TOKEN_TYPE_EXCLMARK, CSTNodeType::CST_NODE_TYPE_OP_BOOLNOT },
-    { TokenType::TOKEN_TYPE_TILDE, CSTNodeType::CST_NODE_TYPE_OP_NOT },
+  };
+
+  const std::map<TokenType, CSTNodeType> prefix_operators = {
+    { TokenType::TOKEN_TYPE_EXCLMARK,
+      CSTNodeType::CST_NODE_TYPE_PREFIXOP_BOOLNOT },
+    { TokenType::TOKEN_TYPE_MINUS, CSTNodeType::CST_NODE_TYPE_PREFIXOP_MINUS },
+    { TokenType::TOKEN_TYPE_TILDE, CSTNodeType::CST_NODE_TYPE_PREFIXOP_NOT },
   };
 
   const std::map<TokenType, CSTNodeType> assign_operators = {
@@ -145,6 +162,20 @@ private:
     { TokenType::TOKEN_TYPE_PIPE_PIPE, CSTNodeType::CST_NODE_TYPE_BOOLOP_OR },
   };
 
+  const std::map<TokenType, CSTNodeType> pre_operators = {
+    { TokenType::TOKEN_TYPE_PLUS_PLUS,
+      CSTNodeType::CST_NODE_TYPE_PREOP_INCREMENT },
+    { TokenType::TOKEN_TYPE_MINUS_MINUS,
+      CSTNodeType::CST_NODE_TYPE_PREOP_DECREMENT },
+  };
+
+  const std::map<TokenType, CSTNodeType> post_operators = {
+    { TokenType::TOKEN_TYPE_PLUS_PLUS,
+      CSTNodeType::CST_NODE_TYPE_POSTOP_INCREMENT },
+    { TokenType::TOKEN_TYPE_MINUS_MINUS,
+      CSTNodeType::CST_NODE_TYPE_POSTOP_DECREMENT },
+  };
+
   const std::vector<std::string> keywords = {
     "const",
     "static",
@@ -169,6 +200,8 @@ private:
   //   | return <expr>;
   //   | *<stmt>
   //   | { <stmtlist> }
+  //   | break;
+  //   | continue;
   //   ;
   CSTNode parse_statement ();
   CSTNode parse_if_statement ();     // if (<expr>) <stmt>
@@ -192,16 +225,26 @@ private:
   //   ;
   CSTNode parse_case_statement ();
 
+  CSTNode parse_expression ();
+  CSTNode parse_prefix_operator ();
+  CSTNode parse_operand ();
+  CSTNode parse_idoperand ();
+
   CSTNode parse_label_statement (); // <id>:
 
   // TODO: remove me
   void skip_until (TokenType toktype);
 
   bool is_operator (TokenType toktype) const;
+  bool is_prefix_operator (TokenType toktype) const;
   bool is_assign_operator (TokenType toktype) const;
   bool is_compare_operator (TokenType toktype) const;
   bool is_boolean_operator (TokenType toktype) const;
+  bool is_pre_operator (TokenType toktype) const;
+  bool is_post_operator (TokenType toktype) const;
   bool is_keyword (const std::string &str) const;
+  bool is_operand (TokenType toktype) const;
+  bool is_idoperand (TokenType toktype) const;
 };
 
 }
