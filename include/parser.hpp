@@ -8,75 +8,99 @@
 namespace nlc
 {
 
-enum CSTNodeType : unsigned char
+// 0b00000000'00000000
+//   ~~~~~~~^ ~~~~~~~^
+//      Group     Type
+#define __NLC_CSTNODETYPE_DEF_(group, id)                                     \
+  (((group) & 0xFF) << 8) | ((id) & 0xFF)
+#define __NLC_CSTNODETYPE_GET_GROUP_(type) (((type) >> 8) & 0xFF)
+#define __NLC_CSTNODETYPE_GET_ID_(type) ((type) & 0xFF)
+
+enum CSTNodeType : unsigned short
 {
-  CST_NODE_TYPE_UNK = 0b0000'0000,
-  CST_NODE_TYPE_PROGRAM = 0b0000'0001,
-  CST_NODE_TYPE_STMTLIST = 0b0000'0010,
-  CST_NODE_TYPE_EXPR = 0b0000'0011,
+  CST_NODE_TYPE_UNK = __NLC_CSTNODETYPE_DEF_ (0, 0),
+  CST_NODE_TYPE_PROGRAM = __NLC_CSTNODETYPE_DEF_ (0, 1),
+  CST_NODE_TYPE_STMTLIST = __NLC_CSTNODETYPE_DEF_ (0, 2),
+  CST_NODE_TYPE_EXPR = __NLC_CSTNODETYPE_DEF_ (0, 3),
+  CST_NODE_TYPE_TYPEMODIFIER = __NLC_CSTNODETYPE_DEF_ (0, 4),
+  CST_NODE_TYPE_FUNCTION_PROTOTYPE = __NLC_CSTNODETYPE_DEF_ (0, 5),
 
-  CST_NODE_TYPE_STMT_IF = 0b0001'0000,
-  CST_NODE_TYPE_STMT_ELSE = 0b0001'0001,
-  CST_NODE_TYPE_STMT_SWITCH = 0b0001'0010,
-  CST_NODE_TYPE_STMT_DEREF = 0b0001'0011,
-  CST_NODE_TYPE_STMT_RETURN = 0b0001'0100,
-  CST_NODE_TYPE_STMT_BREAK = 0b0001'0101,
-  CST_NODE_TYPE_STMT_CONTINUE = 0b0001'0110,
-  CST_NODE_TYPE_STMT_WHILE = 0b0001'0111,
-  CST_NODE_TYPE_STMT_FOR = 0b0001'1000,
+  CST_NODE_TYPE_STMT_IF = __NLC_CSTNODETYPE_DEF_ (1, 0),
+  CST_NODE_TYPE_STMT_ELSE = __NLC_CSTNODETYPE_DEF_ (1, 1),
+  CST_NODE_TYPE_STMT_SWITCH = __NLC_CSTNODETYPE_DEF_ (1, 2),
+  CST_NODE_TYPE_STMT_RETURN = __NLC_CSTNODETYPE_DEF_ (1, 3),
+  CST_NODE_TYPE_STMT_BREAK = __NLC_CSTNODETYPE_DEF_ (1, 4),
+  CST_NODE_TYPE_STMT_CONTINUE = __NLC_CSTNODETYPE_DEF_ (1, 5),
+  CST_NODE_TYPE_STMT_WHILE = __NLC_CSTNODETYPE_DEF_ (1, 6),
+  CST_NODE_TYPE_STMT_FOR = __NLC_CSTNODETYPE_DEF_ (1, 7),
+  CST_NODE_TYPE_STMT_GOTO = __NLC_CSTNODETYPE_DEF_ (1, 8),
+  CST_NODE_TYPE_STMT_LABEL = __NLC_CSTNODETYPE_DEF_ (1, 9),
 
-  CST_NODE_TYPE_IDSTMT_VAR_ASSIGN_TO_EXPR = 0b0010'0000,
-  CST_NODE_TYPE_IDSTMT_VAR_ASSIGN_TO_EXPRLIST = 0b0010'0001,
-  CST_NODE_TYPE_IDSTMT_ELEM_ASSIGN_TO_EXPR = 0b0010'0010,
-  CST_NODE_TYPE_IDSTMT_ELEM_ASSIGN_TO_EXPRLIST = 0b0010'0011,
-  CST_NODE_TYPE_IDSTMT_CALL = 0b0010'0100,
-  CST_NODE_TYPE_IDSTMT_LABEL = 0b0010'0101,
+  CST_NODE_TYPE_IDSTMT_CREATE = __NLC_CSTNODETYPE_DEF_ (2, 0),
+  CST_NODE_TYPE_IDSTMT_ASSIGN = __NLC_CSTNODETYPE_DEF_ (2, 1),
+  CST_NODE_TYPE_IDSTMT_FUNC_DECLARATION = __NLC_CSTNODETYPE_DEF_ (2, 2),
+  CST_NODE_TYPE_IDSTMT_FUNC_DEFINITION = __NLC_CSTNODETYPE_DEF_ (2, 3),
+  CST_NODE_TYPE_IDSTMT_CALL = __NLC_CSTNODETYPE_DEF_ (2, 4),
 
-  CST_NODE_TYPE_CASESTMT_CASE = 0b0011'0000,
-  CST_NODE_TYPE_CASESTMT_DEFAULT = 0b0011'0001,
+  CST_NODE_TYPE_CASESTMT_CASE = __NLC_CSTNODETYPE_DEF_ (3, 0),
+  CST_NODE_TYPE_CASESTMT_DEFAULT = __NLC_CSTNODETYPE_DEF_ (3, 1),
 
-  CST_NODE_TYPE_OP_ADD = 0b0100'0000,
-  CST_NODE_TYPE_OP_SUB = 0b0100'0001,
-  CST_NODE_TYPE_OP_MUL = 0b0100'0010,
-  CST_NODE_TYPE_OP_DIV = 0b0100'0011,
-  CST_NODE_TYPE_OP_MOD = 0b0100'0100,
-  CST_NODE_TYPE_OP_AND = 0b0100'0101,
-  CST_NODE_TYPE_OP_OR = 0b0100'0110,
-  CST_NODE_TYPE_OP_XOR = 0b0100'0111,
+  CST_NODE_TYPE_OP_ADD = __NLC_CSTNODETYPE_DEF_ (4, 0),
+  CST_NODE_TYPE_OP_SUB = __NLC_CSTNODETYPE_DEF_ (4, 1),
+  CST_NODE_TYPE_OP_MUL = __NLC_CSTNODETYPE_DEF_ (4, 2),
+  CST_NODE_TYPE_OP_DIV = __NLC_CSTNODETYPE_DEF_ (4, 3),
+  CST_NODE_TYPE_OP_MOD = __NLC_CSTNODETYPE_DEF_ (4, 4),
+  CST_NODE_TYPE_OP_AND = __NLC_CSTNODETYPE_DEF_ (4, 5),
+  CST_NODE_TYPE_OP_OR = __NLC_CSTNODETYPE_DEF_ (4, 6),
+  CST_NODE_TYPE_OP_XOR = __NLC_CSTNODETYPE_DEF_ (4, 7),
 
-  CST_NODE_TYPE_PREFIXOP_BOOLNOT = 0b0101'0000,
-  CST_NODE_TYPE_PREFIXOP_MINUS = 0b0101'0001,
-  CST_NODE_TYPE_PREFIXOP_NOT = 0b0101'0010,
+  CST_NODE_TYPE_PREFIXOP_BOOLNOT = __NLC_CSTNODETYPE_DEF_ (5, 0),
+  CST_NODE_TYPE_PREFIXOP_MINUS = __NLC_CSTNODETYPE_DEF_ (5, 1),
+  CST_NODE_TYPE_PREFIXOP_NOT = __NLC_CSTNODETYPE_DEF_ (5, 2),
 
-  CST_NODE_TYPE_ASSIGNOP_EQUAL = 0b0110'0000,
-  CST_NODE_TYPE_ASSIGNOP_ADD_EQ = 0b0110'0001,
-  CST_NODE_TYPE_ASSIGNOP_SUB_EQ = 0b0110'0010,
-  CST_NODE_TYPE_ASSIGNOP_MUL_EQ = 0b0110'0011,
-  CST_NODE_TYPE_ASSIGNOP_DIV_EQ = 0b0110'0100,
-  CST_NODE_TYPE_ASSIGNOP_MOD_EQ = 0b0110'0101,
-  CST_NODE_TYPE_ASSIGNOP_AND_EQ = 0b0110'0110,
-  CST_NODE_TYPE_ASSIGNOP_OR_EQ = 0b0110'0111,
-  CST_NODE_TYPE_ASSIGNOP_XOR_EQ = 0b0110'1000,
+  CST_NODE_TYPE_ASSIGNOP_EQUAL = __NLC_CSTNODETYPE_DEF_ (6, 0),
+  CST_NODE_TYPE_ASSIGNOP_ADD_EQ = __NLC_CSTNODETYPE_DEF_ (6, 1),
+  CST_NODE_TYPE_ASSIGNOP_SUB_EQ = __NLC_CSTNODETYPE_DEF_ (6, 2),
+  CST_NODE_TYPE_ASSIGNOP_MUL_EQ = __NLC_CSTNODETYPE_DEF_ (6, 3),
+  CST_NODE_TYPE_ASSIGNOP_DIV_EQ = __NLC_CSTNODETYPE_DEF_ (6, 4),
+  CST_NODE_TYPE_ASSIGNOP_MOD_EQ = __NLC_CSTNODETYPE_DEF_ (6, 5),
+  CST_NODE_TYPE_ASSIGNOP_AND_EQ = __NLC_CSTNODETYPE_DEF_ (6, 6),
+  CST_NODE_TYPE_ASSIGNOP_OR_EQ = __NLC_CSTNODETYPE_DEF_ (6, 7),
+  CST_NODE_TYPE_ASSIGNOP_XOR_EQ = __NLC_CSTNODETYPE_DEF_ (6, 8),
 
-  CST_NODE_TYPE_CMPOP_EQUAL = 0b0111'0000,
-  CST_NODE_TYPE_CMPOP_NOT_EQUAL = 0b0111'0001,
-  CST_NODE_TYPE_CMPOP_LESS = 0b0111'0010,
-  CST_NODE_TYPE_CMPOP_GREATER = 0b0111'0011,
-  CST_NODE_TYPE_CMPOP_LESS_OR_EQUAL = 0b0111'0100,
-  CST_NODE_TYPE_CMPOP_GREATER_OR_EQUAL = 0b0111'0101,
+  CST_NODE_TYPE_CMPOP_EQUAL = __NLC_CSTNODETYPE_DEF_ (7, 0),
+  CST_NODE_TYPE_CMPOP_NOT_EQUAL = __NLC_CSTNODETYPE_DEF_ (7, 1),
+  CST_NODE_TYPE_CMPOP_LESS = __NLC_CSTNODETYPE_DEF_ (7, 2),
+  CST_NODE_TYPE_CMPOP_GREATER = __NLC_CSTNODETYPE_DEF_ (7, 3),
+  CST_NODE_TYPE_CMPOP_LESS_OR_EQUAL = __NLC_CSTNODETYPE_DEF_ (7, 4),
+  CST_NODE_TYPE_CMPOP_GREATER_OR_EQUAL = __NLC_CSTNODETYPE_DEF_ (7, 5),
 
-  CST_NODE_TYPE_BOOLOP_AND = 0b1000'0000,
-  CST_NODE_TYPE_BOOLOP_OR = 0b1000'0001,
+  CST_NODE_TYPE_BOOLOP_AND = __NLC_CSTNODETYPE_DEF_ (8, 0),
+  CST_NODE_TYPE_BOOLOP_OR = __NLC_CSTNODETYPE_DEF_ (8, 1),
 
-  CST_NODE_TYPE_PREOP_INCREMENT = 0b1001'0000,
-  CST_NODE_TYPE_PREOP_DECREMENT = 0b1001'0001,
+  CST_NODE_TYPE_PREOP_INCREMENT = __NLC_CSTNODETYPE_DEF_ (9, 0),
+  CST_NODE_TYPE_PREOP_DECREMENT = __NLC_CSTNODETYPE_DEF_ (9, 1),
 
-  CST_NODE_TYPE_POSTOP_INCREMENT = 0b1010'0000,
-  CST_NODE_TYPE_POSTOP_DECREMENT = 0b1010'0001,
+  CST_NODE_TYPE_POSTOP_INCREMENT = __NLC_CSTNODETYPE_DEF_ (10, 0),
+  CST_NODE_TYPE_POSTOP_DECREMENT = __NLC_CSTNODETYPE_DEF_ (10, 1),
 
-  CST_NODE_TYPE_OPERAND_INTEGER = 0b1011'0000,
-  CST_NODE_TYPE_OPERAND_FLOATING = 0b1011'0001,
-  CST_NODE_TYPE_OPERAND_ID = 0b1011'0010,
+  CST_NODE_TYPE_OPERAND_INTEGER = __NLC_CSTNODETYPE_DEF_ (11, 0),
+  CST_NODE_TYPE_OPERAND_FLOATING = __NLC_CSTNODETYPE_DEF_ (11, 1),
+  CST_NODE_TYPE_OPERAND_ID = __NLC_CSTNODETYPE_DEF_ (11, 2),
+
+  CST_NODE_TYPE_IDCREATESTMT_WITH_ASSIGN = __NLC_CSTNODETYPE_DEF_ (12, 0),
+  CST_NODE_TYPE_IDCREATESTMT_WITHOUT_ASSIGN = __NLC_CSTNODETYPE_DEF_ (12, 1),
+
+  CST_NODE_TYPE_IDCREATE_WITH_MOD = __NLC_CSTNODETYPE_DEF_ (13, 0),
+  CST_NODE_TYPE_IDCREATE_PLAIN = __NLC_CSTNODETYPE_DEF_ (13, 1),
+  CST_NODE_TYPE_IDCREATE_LIST = __NLC_CSTNODETYPE_DEF_ (13, 2),
+
+  CST_NODE_TYPE_IDTYPE_POINTER = __NLC_CSTNODETYPE_DEF_ (14, 0),
+  CST_NODE_TYPE_IDTYPE_PLAIN = __NLC_CSTNODETYPE_DEF_ (14, 1),
+
+  CST_NODE_TYPE_IDTYPERAW_PLAIN = __NLC_CSTNODETYPE_DEF_ (15, 0),
+  CST_NODE_TYPE_IDTYPERAW_ARRAY = __NLC_CSTNODETYPE_DEF_ (15, 1),
+  CST_NODE_TYPE_IDTYPERAW_FUNCPTR = __NLC_CSTNODETYPE_DEF_ (15, 2),
 };
 
 struct CSTNode
@@ -178,7 +202,7 @@ private:
       CSTNodeType::CST_NODE_TYPE_POSTOP_DECREMENT },
   };
 
-  const std::vector<std::string> keywords = {
+  const std::vector<std::string> typemodifiers = {
     "const",
     "static",
     "inline",
@@ -198,32 +222,75 @@ private:
   //   : <idstmt>
   //   | if (<expr>) <stmt>
   //   | else <stmt>
-  //   | switch { <casestmts> }
+  //   | switch (<expr>) { <casestmts> }
   //   | return <expr>;
-  //   | *<stmt>
   //   | { <stmtlist> }
   //   | break;
   //   | continue;
   //   | while (<expr>) <stmt>
   //   | for (<stmt>; <expr>; <expr>) <stmt>
+  //   | goto @<id>;
+  //   | @<id>:
   //   ;
   CSTNode parse_statement ();
   CSTNode parse_if_statement ();     // if (<expr>) <stmt>
   CSTNode parse_else_statement ();   // else <stmt>
-  CSTNode parse_switch_statement (); // switch { <casestmts> }
+  CSTNode parse_switch_statement (); // switch (<expr>) { <casestmts> }
   CSTNode parse_return_statement (); // return <expr>;
   CSTNode parse_while_statement ();  // while (<expr>) <stmt>
   CSTNode parse_for_statement ();    // for (<stmt>; <expr>; <expr>) <stmt>
+  CSTNode parse_goto_statement ();   // goto @<id>;
+  CSTNode parse_label_statement ();  // @<id>:
 
   // <idstmt>
   //   : <idcreatestmt>
-  //   | <id> <assignop> <expr>;
-  //   | <id> = { <exprlist> };
-  //   | <arraystmt>
+  //   | <idoperand> <assignop> <expr>;
+  //   | <funcproto>;
+  //   | <funcproto> { <stmtlist> }
   //   | <call>;
-  //   | <id>:
   //   ;
   CSTNode parse_identifier_statement ();
+  CSTNode parse_function_prototype_statement ();
+
+  // <idcreatestmt>
+  //   : <idcreate> = <expr>;
+  //   | <idcreate>;
+  //   ;
+  CSTNode parse_identifier_create_statement ();
+
+  // <idcreate>
+  //   : <typemodifier> <idcreate>
+  //   | <id>: <idtype>
+  //   ;
+  CSTNode parse_identifier_create ();
+  CSTNode parse_identifier_create_list ();
+
+  // <idtype>
+  //   : *<idtype>
+  //   | <idtyperaw>
+  //   ;
+  CSTNode parse_identifier_type ();
+
+  // <idtyperaw>
+  //   : <id>
+  //   | <id>[<expr>]
+  //   | (<idcreatelist>): <id>
+  //   ;
+  CSTNode parse_identifier_type_raw ();
+  CSTNode parse_identifier_type_raw_plain (); // <id>
+  CSTNode parse_identifier_type_raw_array (); // <id>[<expr>]
+  CSTNode
+  parse_identifier_type_raw_funcptr (); // <idtyperaw> :: (<idcreatelist>)
+
+  // <funcproto>
+  //   : <id> :: (<idcreatelist>): <id>
+  //   ;
+  CSTNode parse_function_prototype ();
+
+  // <call>
+  //   : <id>(<exprlist>)
+  //   ;
+  CSTNode parse_call ();
 
   // <casestmt>
   //   : case <expr>: { <stmtlist> }
@@ -236,8 +303,6 @@ private:
   CSTNode parse_operand ();
   CSTNode parse_idoperand ();
 
-  CSTNode parse_label_statement (); // <id>:
-
   // TODO: remove me
   void skip_until (TokenType toktype);
 
@@ -248,7 +313,7 @@ private:
   bool is_boolean_operator (TokenType toktype) const;
   bool is_pre_operator (TokenType toktype) const;
   bool is_post_operator (TokenType toktype) const;
-  bool is_keyword (const std::string &str) const;
+  bool is_typemodifier (const std::string &str) const;
   bool is_operand (TokenType toktype) const;
   bool is_idoperand (TokenType toktype) const;
 };

@@ -36,6 +36,12 @@ tokentype_to_string (TokenType type)
       return "EQ";
     case TokenType::TOKEN_TYPE_NUMBER:
       return "NUMBER";
+    case TokenType::TOKEN_TYPE_NUMBER_HEX:
+      return "NUMBER_HEX";
+    case TokenType::TOKEN_TYPE_NUMBER_BIN:
+      return "NUMBER_BIN";
+    case TokenType::TOKEN_TYPE_NUMBER_OCT:
+      return "NUMBER_OCT";
     case TokenType::TOKEN_TYPE_FLOATING:
       return "FLOATING";
     case TokenType::TOKEN_TYPE_STRING:
@@ -90,6 +96,12 @@ tokentype_to_string (TokenType type)
       return "PERIOD";
     case TokenType::TOKEN_TYPE_QUEMARK:
       return "QUEMARK";
+    case TokenType::TOKEN_TYPE_SHL:
+      return "SHL";
+    case TokenType::TOKEN_TYPE_SHR:
+      return "SHR";
+    case TokenType::TOKEN_TYPE_AT:
+      return "AT";
     case TokenType::TOKEN_TYPE_PLUS_EQ:
       return "PLUS_EQ";
     case TokenType::TOKEN_TYPE_MINUS_EQ:
@@ -114,6 +126,10 @@ tokentype_to_string (TokenType type)
       return "RARROW_EQ";
     case TokenType::TOKEN_TYPE_EXCLMARK_EQ:
       return "EXCLMARK_EQ";
+    case TokenType::TOKEN_TYPE_SHL_EQ:
+      return "SHL_EQ";
+    case TokenType::TOKEN_TYPE_SHR_EQ:
+      return "SHR_EQ";
     case TokenType::TOKEN_TYPE_EQ_EQ:
       return "EQ_EQ";
     case TokenType::TOKEN_TYPE_PLUS_PLUS:

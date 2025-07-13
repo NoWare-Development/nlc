@@ -116,22 +116,56 @@ Lexer::tokenize (const std::string &src)
 
         case '<':
           {
-            if (pos + 1 < srclen && src.at (pos + 1) == '=')
+            if (pos + 1 < srclen)
               {
-                out.emplace_back (TokenType::TOKEN_TYPE_LARROW_EQ);
-                pos++;
-                break;
+                if (src.at (pos + 1) == '=')
+                  {
+                    out.emplace_back (TokenType::TOKEN_TYPE_LARROW_EQ);
+                    pos++;
+                    break;
+                  }
+
+                if (src.at (pos + 1) == '<')
+                  {
+                    if (pos + 2 < srclen && src.at (pos + 2) == '=')
+                      {
+                        out.emplace_back (TokenType::TOKEN_TYPE_SHL_EQ);
+                        pos += 2;
+                        break;
+                      }
+
+                    out.emplace_back (TokenType::TOKEN_TYPE_SHL);
+                    pos++;
+                    break;
+                  }
               }
             out.emplace_back (TokenType::TOKEN_TYPE_LARROW);
           }
           break;
         case '>':
           {
-            if (pos + 1 < srclen && src.at (pos + 1) == '=')
+            if (pos + 1 < srclen)
               {
-                out.emplace_back (TokenType::TOKEN_TYPE_RARROW_EQ);
-                pos++;
-                break;
+                if (src.at (pos + 1) == '=')
+                  {
+                    out.emplace_back (TokenType::TOKEN_TYPE_RARROW_EQ);
+                    pos++;
+                    break;
+                  }
+
+                if (src.at (pos + 1) == '>')
+                  {
+                    if (pos + 2 < srclen && src.at (pos + 2) == '=')
+                      {
+                        out.emplace_back (TokenType::TOKEN_TYPE_SHR_EQ);
+                        pos += 2;
+                        break;
+                      }
+
+                    out.emplace_back (TokenType::TOKEN_TYPE_SHR);
+                    pos++;
+                    break;
+                  }
               }
             out.emplace_back (TokenType::TOKEN_TYPE_RARROW);
           }
@@ -335,6 +369,12 @@ Lexer::tokenize (const std::string &src)
             out.emplace_back (TokenType::TOKEN_TYPE_QUEMARK);
           }
           break;
+
+        case '@':
+          {
+            out.emplace_back (TokenType::TOKEN_TYPE_AT);
+          }
+          break;
         }
 
       pos++;
@@ -427,7 +467,7 @@ Lexer::process_number ()
 Token
 Lexer::process_hexadecimal ()
 {
-  std::string val = "0x";
+  std::string val{};
 
   pos += 2;
   while (pos < srclen)
@@ -442,13 +482,13 @@ Lexer::process_hexadecimal ()
       pos++;
     }
 
-  return Token (TokenType::TOKEN_TYPE_NUMBER, val);
+  return Token (TokenType::TOKEN_TYPE_NUMBER_HEX, val);
 }
 
 Token
 Lexer::process_binary ()
 {
-  std::string val = "0b";
+  std::string val{};
 
   pos += 2;
   while (pos < srclen)
@@ -463,13 +503,13 @@ Lexer::process_binary ()
       pos++;
     }
 
-  return Token (TokenType::TOKEN_TYPE_NUMBER, val);
+  return Token (TokenType::TOKEN_TYPE_NUMBER_BIN, val);
 }
 
 Token
 Lexer::process_octal ()
 {
-  std::string val = "0";
+  std::string val{};
 
   pos += 1;
   while (pos < srclen)
@@ -484,7 +524,7 @@ Lexer::process_octal ()
       pos++;
     }
 
-  return Token (TokenType::TOKEN_TYPE_NUMBER, val);
+  return Token (TokenType::TOKEN_TYPE_NUMBER_OCT, val);
 }
 
 Token

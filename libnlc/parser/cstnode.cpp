@@ -62,39 +62,43 @@ CSTNode::change_depth (size_t depth)
 std::string
 cstnodetype_to_string (CSTNodeType type)
 {
-  constexpr const char *group_prefixes[] = {
-    "",          "STMT_",  "IDSTMT_", "CASESTMT_", "OP_",     "PREFIXOP_",
-    "ASSIGNOP_", "CMPOP_", "BOOLOP_", "PREOP_",    "POSTOP_", "OPERAND_",
+  constexpr const char *group_prefixes[0x100] = {
+    "",           "STMT_",     "IDSTMT_",       "CASESTMT_", "OP_",
+    "PREFIXOP_",  "ASSIGNOP_", "CMPOP_",        "BOOLOP_",   "PREOP_",
+    "POSTOP_",    "OPERAND_",  "IDCREATESTMT_", "IDCREATE_", "IDTYPE_",
+    "IDTYPERAW_",
   };
 
-  constexpr const char *group_items[16][16] = {
+  constexpr const char *group_items[0x100][0x100] = {
     {
         // groupless
         "UNK",
         "PROGRAM",
         "STMTLIST",
         "EXPR",
+        "TYPEMODIFIER",
+        "FUNCTION_PROTOTYPE",
     },
     {
         // STMT
         "IF",
         "ELSE",
         "SWITCH",
-        "DEREF",
         "RETURN",
         "BREAK",
         "CONTINUE",
         "WHILE",
         "FOR",
+        "GOTO",
+        "LABEL",
     },
     {
         // IDSTMT
-        "VAR_ASSIGN_TO_EXPR",
-        "VAR_ASSIGN_TO_EXPRLIST",
-        "ELEM_ASSIGN_TO_EXPR",
-        "ELEM_ASSIGN_TO_EXPRLIST",
+        "CREATE",
+        "ASSIGN",
+        "FUNC_DECLARATION",
+        "FUNC_DEFINITION",
         "CALL",
-        "LABEL",
     },
     {
         // CASESTMT
@@ -160,10 +164,33 @@ cstnodetype_to_string (CSTNodeType type)
         "FLOATING",
         "ID",
     },
+    {
+        // IDCREATESTMT
+        "WITH_ASSIGN",
+        "WITHOUT_ASSIGN",
+    },
+    {
+        // IDCREATE
+        "WITH_MOD",
+        "PLAIN",
+        "LIST",
+    },
+    {
+        // IDTYPE
+        "POINTER",
+        "PLAIN",
+    },
+    {
+        // IDTYPERAW
+        "PLAIN",
+        "ARRAY",
+        "FUNCPTR",
+    },
   };
 
-  std::string out = group_prefixes[type >> 4];
-  out += group_items[type >> 4][type & 15];
+  std::string out = group_prefixes[__NLC_CSTNODETYPE_GET_GROUP_ (type)];
+  out += group_items[__NLC_CSTNODETYPE_GET_GROUP_ (type)]
+                    [__NLC_CSTNODETYPE_GET_ID_ (type)];
   return out;
 }
 

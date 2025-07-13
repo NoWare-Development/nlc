@@ -64,10 +64,6 @@ Parser::parse_statement ()
   auto cur = toks.at (pos);
   switch (cur.type)
     {
-    case TokenType::TOKEN_TYPE_ASTERISK:
-      // TODO: implementation -- dereference
-      return {};
-
     case TokenType::TOKEN_TYPE_LBRACE:
       {
         pos++;
@@ -82,9 +78,17 @@ Parser::parse_statement ()
         return stmtlist;
       }
 
+    case TokenType::TOKEN_TYPE_AT:
+      return parse_label_statement ();
+
     case TokenType::TOKEN_TYPE_SEMICOL:
       // TODO: warning -- dangling semicolon
       return {};
+
+    case TokenType::TOKEN_TYPE_ASTERISK:
+      {
+        return parse_identifier_statement ();
+      }
 
     case TokenType::TOKEN_TYPE_ID:
       {
@@ -135,6 +139,10 @@ Parser::parse_statement ()
         else if (cur.value == "for")
           {
             return parse_for_statement ();
+          }
+        else if (cur.value == "goto")
+          {
+            return parse_goto_statement ();
           }
         return parse_identifier_statement ();
       }
@@ -274,7 +282,6 @@ Parser::parse_for_statement ()
   pos++;
   if (pos >= tokenslen)
     {
-      std::cout << "ERR 1\n";
       // TODO: error -- expected token
       return {};
     }
@@ -282,14 +289,12 @@ Parser::parse_for_statement ()
   auto cur = toks.at (pos);
   if (cur.type != TokenType::TOKEN_TYPE_LPAREN)
     {
-      std::cout << "ERR 2\n";
       // TODO: error -- unexpected token
       return {};
     }
   pos++;
   if (pos >= tokenslen)
     {
-      std::cout << "ERR 3\n";
       // TODO: error -- expected token
       return {};
     }
@@ -298,14 +303,12 @@ Parser::parse_for_statement ()
   skip_until (TokenType::TOKEN_TYPE_RPAREN);
   if (pos >= tokenslen)
     {
-      std::cout << "ERR 4\n";
       // TODO: error -- expected token
       return {};
     }
   cur = toks.at (pos);
   if (cur.type != TokenType::TOKEN_TYPE_RPAREN)
     {
-      std::cout << "ERR 5\n";
       // TODO: error -- unexpected token
       return {};
     }
@@ -313,7 +316,6 @@ Parser::parse_for_statement ()
   pos++;
   if (pos >= tokenslen)
     {
-      std::cout << "ERR 6\n";
       // TODO: error -- expected token
       return {};
     }
@@ -325,33 +327,533 @@ Parser::parse_for_statement ()
 }
 
 CSTNode
+Parser::parse_goto_statement ()
+{
+  CSTNode goto_statement (CSTNodeType::CST_NODE_TYPE_STMT_GOTO);
+
+  pos++;
+  if (pos >= tokenslen)
+    {
+      // TODO: error -- expected token
+      return {};
+    }
+  auto cur = toks.at (pos);
+  if (cur.type != TokenType::TOKEN_TYPE_AT)
+    {
+      // TODO: error -- unexpected token
+      return {};
+    }
+  pos++;
+  if (pos >= tokenslen)
+    {
+      // TODO: error -- expected token
+      return {};
+    }
+  cur = toks.at (pos);
+  if (cur.type != TokenType::TOKEN_TYPE_ID)
+    {
+      // TODO: error -- unexpected token
+      return {};
+    }
+  goto_statement.value = cur.value;
+
+  pos++;
+  if (pos >= tokenslen)
+    {
+      // TODO: error -- expected token
+      return {};
+    }
+  cur = toks.at (pos);
+  if (cur.type != TokenType::TOKEN_TYPE_SEMICOL)
+    {
+      // TODO: error -- unexpected token
+      return {};
+    }
+  pos++;
+
+  return goto_statement;
+}
+
+CSTNode
+Parser::parse_label_statement ()
+{
+  CSTNode label_statement (CSTNodeType::CST_NODE_TYPE_STMT_LABEL);
+  pos++;
+  if (pos >= tokenslen)
+    {
+      // TODO: error -- expected token
+      return {};
+    }
+  auto cur = toks.at (pos);
+  if (cur.type != TokenType::TOKEN_TYPE_ID)
+    {
+      // TODO: error -- unexpected token
+      return {};
+    }
+  label_statement.value = cur.value;
+
+  pos++;
+  if (pos >= tokenslen)
+    {
+      // TODO: error -- expected token
+      return {};
+    }
+  cur = toks.at (pos);
+  if (cur.type != TokenType::TOKEN_TYPE_COLON)
+    {
+      // TODO: error -- unexpected token
+      return {};
+    }
+  pos++;
+
+  return label_statement;
+}
+
+CSTNode
 Parser::parse_identifier_statement ()
 {
-  auto next1 = toks.at (pos + 1);
-
-  switch (next1.type)
+  if (pos + 1 >= tokenslen)
     {
-    case TokenType::TOKEN_TYPE_ID:
-      // TODO: implementation -- identifier creation statement
+      // TODO: error -- expected token
       return {};
+    }
+  auto next = toks.at (pos + 1);
+  switch (next.type)
+    {
+    case TokenType::TOKEN_TYPE_COLON:
+      return parse_identifier_create_statement ();
 
-    case TokenType::TOKEN_TYPE_LBRACK:
-      // TODO: implementation -- array statement
-      return {};
+    case TokenType::TOKEN_TYPE_COLON_COLON:
+      return parse_function_prototype_statement ();
 
     case TokenType::TOKEN_TYPE_LPAREN:
-      // TODO: implementation -- call
-      return {};
-
-    case TokenType::TOKEN_TYPE_COLON:
-      return parse_label_statement ();
+      {
+        auto call = parse_call ();
+        if (toks.at (pos).type != TokenType::TOKEN_TYPE_SEMICOL)
+          {
+            // TODO: error -- unexpected token
+            return {};
+          }
+        CSTNode call_statement (CSTNodeType::CST_NODE_TYPE_IDSTMT_CALL);
+        call_statement.append (call);
+        return call_statement;
+      }
 
     default:
-      break;
+      return {};
+    }
+}
+
+CSTNode
+Parser::parse_function_prototype_statement ()
+{
+  auto func_proto = parse_function_prototype ();
+  if (pos >= tokenslen)
+    {
+      // TODO: error -- expected token
+      return {};
     }
 
-  // TODO: implementation -- identifier assignment
+  auto cur = toks.at (pos);
+  if (cur.type == TokenType::TOKEN_TYPE_SEMICOL)
+    {
+      CSTNode func_decl (CSTNodeType::CST_NODE_TYPE_IDSTMT_FUNC_DECLARATION);
+      func_decl.append (func_proto);
+      pos++;
+      return func_decl;
+    }
+
+  if (cur.type == TokenType::TOKEN_TYPE_LBRACE)
+    {
+      CSTNode func_def (CSTNodeType::CST_NODE_TYPE_IDSTMT_FUNC_DEFINITION);
+      func_def.append (func_proto);
+      pos++;
+      if (pos >= tokenslen)
+        {
+          // TODO: error -- expected token
+          return {};
+        }
+
+      auto statement_list = parse_statement_list ();
+      func_def.append (statement_list);
+      if (pos >= tokenslen)
+        {
+          // TODO: error -- expected token
+          return {};
+        }
+      cur = toks.at (pos);
+      if (cur.type != TokenType::TOKEN_TYPE_RBRACE)
+        {
+          // TODO: error -- unexpected token
+          return {};
+        }
+
+      pos++;
+      return func_def;
+    }
+
+  // TODO: error -- unexpected token
   return {};
+}
+
+CSTNode
+Parser::parse_identifier_create_statement ()
+{
+  auto identifier_create = parse_identifier_create ();
+  if (pos >= tokenslen)
+    {
+      // TODO: error -- expected token
+      return {};
+    }
+  auto cur = toks.at (pos);
+  if (cur.type == TokenType::TOKEN_TYPE_EQ)
+    {
+      CSTNode id_create_stmt_with_assign (
+          CSTNodeType::CST_NODE_TYPE_IDCREATESTMT_WITH_ASSIGN);
+      id_create_stmt_with_assign.append (identifier_create);
+      pos++;
+      if (pos >= tokenslen)
+        {
+          // TODO: error -- expected token
+          return {};
+        }
+      skip_until (TokenType::TOKEN_TYPE_SEMICOL); // TODO: parse expression
+      if (pos >= tokenslen)
+        {
+          // TODO: error -- expected token
+          return {};
+        }
+      cur = toks.at (pos);
+      if (cur.type != TokenType::TOKEN_TYPE_SEMICOL)
+        {
+          // TODO: error -- unexpected token
+          return {};
+        }
+      pos++;
+      return id_create_stmt_with_assign;
+    }
+
+  if (cur.type == TokenType::TOKEN_TYPE_SEMICOL)
+    {
+      CSTNode id_create_stmt_without_assign (
+          CSTNodeType::CST_NODE_TYPE_IDCREATESTMT_WITHOUT_ASSIGN);
+      id_create_stmt_without_assign.append (identifier_create);
+      pos++;
+      return id_create_stmt_without_assign;
+    }
+
+  // TODO: error -- unexpected token
+  return {};
+}
+
+CSTNode
+Parser::parse_identifier_create ()
+{
+  auto cur = toks.at (pos);
+  if (is_typemodifier (cur.value))
+    {
+      CSTNode identifier_create_with_mod (
+          CSTNodeType::CST_NODE_TYPE_IDCREATE_WITH_MOD);
+      CSTNode typemodifier (CSTNodeType::CST_NODE_TYPE_TYPEMODIFIER,
+                            cur.value);
+      identifier_create_with_mod.append (parse_identifier_create ());
+      return identifier_create_with_mod;
+    }
+
+  if (pos + 1 >= tokenslen)
+    {
+      // TODO: error -- expected token
+      return {};
+    }
+  auto next = toks.at (pos + 1);
+  if (next.type != TokenType::TOKEN_TYPE_COLON)
+    {
+      // TODO: error -- unexpected token
+      return {};
+    }
+  pos += 2;
+
+  if (pos >= tokenslen)
+    {
+      // TODO: error -- expected token
+      return {};
+    }
+
+  auto identifier_type = parse_identifier_type ();
+
+  CSTNode identifier_create (CSTNodeType::CST_NODE_TYPE_IDCREATE_PLAIN,
+                             cur.value);
+  identifier_create.append (identifier_type);
+  return identifier_create;
+}
+
+CSTNode
+Parser::parse_identifier_create_list ()
+{
+  CSTNode identifier_create_list (CSTNodeType::CST_NODE_TYPE_IDCREATE_LIST);
+  while (pos < tokenslen)
+    {
+      auto cur = toks.at (pos);
+      if (cur.type == TokenType::TOKEN_TYPE_COMMA)
+        {
+          pos++;
+          continue;
+        }
+
+      if (cur.type == TokenType::TOKEN_TYPE_ID && is_typemodifier (cur.value)
+          && cur.value != "const")
+        {
+          // TODO: error -- static and inline modifiers are not allowed
+          return {};
+        }
+
+      if (cur.type != TokenType::TOKEN_TYPE_ID)
+        {
+          break;
+        }
+
+      auto identifier_create = parse_identifier_create ();
+      if (identifier_create.type == CSTNodeType::CST_NODE_TYPE_UNK)
+        {
+          // TODO: error -- failed to parse identifier creation
+          return {};
+        }
+
+      identifier_create_list.append (identifier_create);
+    }
+  return identifier_create_list;
+}
+
+CSTNode
+Parser::parse_identifier_type ()
+{
+  auto cur = toks.at (pos);
+  if (cur.type == TokenType::TOKEN_TYPE_ASTERISK)
+    {
+      pos++;
+      if (pos >= tokenslen)
+        {
+          // TODO: error -- expected token
+          return {};
+        }
+      CSTNode type_ptr (CSTNodeType::CST_NODE_TYPE_IDTYPE_POINTER);
+      type_ptr.append (parse_identifier_type ());
+      return type_ptr;
+    }
+
+  CSTNode type_raw (CSTNodeType::CST_NODE_TYPE_IDTYPE_PLAIN);
+  if (pos >= tokenslen)
+    {
+      // TODO: error -- expected token
+      return {};
+    }
+  type_raw.append (parse_identifier_type_raw ());
+  return type_raw;
+}
+
+CSTNode
+Parser::parse_identifier_type_raw ()
+{
+  if (pos + 1 < tokenslen)
+    {
+      auto cur = toks.at (pos + 1);
+      if (cur.type == TokenType::TOKEN_TYPE_LBRACK)
+        {
+          return parse_identifier_type_raw_array ();
+        }
+      else if (cur.type == TokenType::TOKEN_TYPE_LPAREN)
+        {
+          return parse_identifier_type_raw_funcptr ();
+        }
+    }
+
+  return parse_identifier_type_raw_plain ();
+}
+
+CSTNode
+Parser::parse_identifier_type_raw_plain ()
+{
+  auto cur = toks.at (pos);
+  pos++;
+  return CSTNode (CSTNodeType::CST_NODE_TYPE_IDTYPERAW_PLAIN, cur.value);
+}
+
+CSTNode
+Parser::parse_identifier_type_raw_array ()
+{
+  CSTNode type_raw_array (CSTNodeType::CST_NODE_TYPE_IDTYPERAW_ARRAY,
+                          toks.at (pos).value);
+
+  pos += 2;
+  skip_until (TokenType::TOKEN_TYPE_RBRACK); // TODO: parse expression
+  if (pos >= tokenslen)
+    {
+      // TODO: error -- expected token
+      return {};
+    }
+  auto cur = toks.at (pos);
+  if (cur.type != TokenType::TOKEN_TYPE_RBRACK)
+    {
+      // TODO: error -- unexpected token
+      return {};
+    }
+  pos++;
+
+  return type_raw_array;
+}
+
+CSTNode
+Parser::parse_identifier_type_raw_funcptr ()
+{
+  CSTNode type_raw_funcptr (CSTNodeType::CST_NODE_TYPE_IDTYPERAW_FUNCPTR);
+  type_raw_funcptr.append (parse_identifier_type_raw ());
+
+  if (pos >= tokenslen)
+    {
+      // TODO: error -- expected token
+      return {};
+    }
+  auto cur = toks.at (pos);
+  if (cur.type != TokenType::TOKEN_TYPE_COLON_COLON)
+    {
+      // TODO: error -- unexpected token
+      return {};
+    }
+  pos++;
+
+  if (pos >= tokenslen)
+    {
+      // TODO: error -- expected token
+      return {};
+    }
+  cur = toks.at (pos);
+  if (cur.type != TokenType::TOKEN_TYPE_LPAREN)
+    {
+      // TODO: error -- unexpected token
+      return {};
+    }
+  pos++;
+
+  auto id_create_list = parse_identifier_create_list ();
+  if (pos >= tokenslen)
+    {
+      // TODO: error -- expected token
+      return {};
+    }
+  cur = toks.at (pos);
+  if (cur.type != TokenType::TOKEN_TYPE_RPAREN)
+    {
+      // TODO: error -- unexpected token
+      return {};
+    }
+  pos++;
+
+  return type_raw_funcptr;
+}
+
+CSTNode
+Parser::parse_function_prototype ()
+{
+  CSTNode func_proto (CSTNodeType::CST_NODE_TYPE_FUNCTION_PROTOTYPE,
+                      toks.at (pos).value);
+  if (pos + 1 >= tokenslen)
+    {
+      // TODO: error -- expected token
+      return {};
+    }
+  auto next = toks.at (pos + 1);
+  if (next.type != TokenType::TOKEN_TYPE_COLON_COLON)
+    {
+      // TODO: error -- unexpected token
+      return {};
+    }
+
+  if (pos + 2 >= tokenslen)
+    {
+      // TODO: error -- expected token
+      return {};
+    }
+  next = toks.at (pos + 2);
+  if (next.type != TokenType::TOKEN_TYPE_LPAREN)
+    {
+      // TODO: error -- unexpected token
+      return {};
+    }
+
+  pos += 3;
+  if (pos >= tokenslen)
+    {
+      // TODO: error -- expected token
+      return {};
+    }
+  auto identifier_create_list = parse_identifier_create_list ();
+  func_proto.append (identifier_create_list);
+
+  if (pos >= tokenslen)
+    {
+      // TODO: error -- expected token
+      return {};
+    }
+  auto cur = toks.at (pos);
+  if (cur.type != TokenType::TOKEN_TYPE_RPAREN)
+    {
+      // TODO: error -- unexpected token
+      return {};
+    }
+  pos++;
+
+  if (pos >= tokenslen)
+    {
+      // TODO: error -- expected token
+      return {};
+    }
+  cur = toks.at (pos);
+  if (cur.type != TokenType::TOKEN_TYPE_COLON)
+    {
+      // TODO: error -- unexpected token
+      return {};
+    }
+  pos++;
+
+  if (pos >= tokenslen)
+    {
+      // TODO: error -- expected token
+      return {};
+    }
+  auto return_type = parse_identifier_type ();
+  func_proto.append (return_type);
+
+  return func_proto;
+}
+
+CSTNode
+Parser::parse_call ()
+{
+  CSTNode call (CSTNodeType::CST_NODE_TYPE_IDSTMT_CALL);
+  auto cur = toks.at (pos);
+  call.value = cur.value;
+  if (pos + 1 >= tokenslen)
+    {
+      // TODO: error -- expected token
+      return {};
+    }
+  auto next = toks.at (pos + 1);
+  if (next.type != TokenType::TOKEN_TYPE_LPAREN)
+    {
+      // TODO: error -- unexpected token
+      return {};
+    }
+
+  pos += 2;
+  skip_until (TokenType::TOKEN_TYPE_RPAREN); // TODO: parse expression list
+  if (pos >= tokenslen)
+    {
+      // TODO: error -- expected token
+      return {};
+    }
+
+  pos++;
+  return call;
 }
 
 CSTNode
@@ -571,14 +1073,6 @@ Parser::parse_idoperand ()
   return {};
 }
 
-CSTNode
-Parser::parse_label_statement ()
-{
-  auto name = toks.at (pos).value;
-  pos += 2;
-  return CSTNode (CSTNodeType::CST_NODE_TYPE_IDSTMT_LABEL, name);
-}
-
 // TODO: remove
 void
 Parser::skip_until (TokenType toktype)
@@ -637,11 +1131,11 @@ Parser::is_post_operator (TokenType toktype) const
 }
 
 bool
-Parser::is_keyword (const std::string &str) const
+Parser::is_typemodifier (const std::string &str) const
 {
-  for (auto &kw : keywords)
+  for (auto &mod : typemodifiers)
     {
-      if (str == kw)
+      if (str == mod)
         return true;
     }
   return false;
@@ -661,5 +1155,4 @@ Parser::is_idoperand (TokenType toktype) const
          || toktype == TokenType::TOKEN_TYPE_PLUS_PLUS
          || toktype == TokenType::TOKEN_TYPE_MINUS_MINUS;
 }
-
 }
