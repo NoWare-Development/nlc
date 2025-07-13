@@ -142,8 +142,12 @@ tokentype_to_string (TokenType type)
       return "AMPERSAND_AMPERSAND";
     case TokenType::TOKEN_TYPE_COLON_COLON:
       return "COLON_COLON";
+    case TokenType::TOKEN_TYPE_LLONGARROW:
+      return "LLONGARROW";
+    case TokenType::TOKEN_TYPE_RLONGARROW:
+      return "RLONGARROW";
     default:
-      return {};
+      return "<Unidentified token type>";
     }
 }
 

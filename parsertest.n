@@ -39,8 +39,8 @@ var_assign: type = 52;
 array: type[52];
 array_assign: type[52] = {};
 
-func_decl :: (arg1: type1, arg2: type2): type_out;
-func_def :: (arg1: type1, arg2: type2, arg3: *type3[4]): type_out {
+func_decl :: (arg1: type1, arg2: type2) -> type_out;
+func_def :: (arg1: type1, arg2: type2, arg3: *type3[4]) -> type_out {
   return 0;
 }
 

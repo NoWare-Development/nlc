@@ -283,7 +283,7 @@ private:
   parse_identifier_type_raw_funcptr (); // <idtyperaw> :: (<idcreatelist>)
 
   // <funcproto>
-  //   : <id> :: (<idcreatelist>): <id>
+  //   : <id> :: (<idcreatelist>) -> <id>
   //   ;
   CSTNode parse_function_prototype ();
 

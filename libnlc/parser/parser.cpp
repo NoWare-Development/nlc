@@ -434,6 +434,7 @@ Parser::parse_identifier_statement ()
             // TODO: error -- unexpected token
             return {};
           }
+        pos++;
         CSTNode call_statement (CSTNodeType::CST_NODE_TYPE_IDSTMT_CALL);
         call_statement.append (call);
         return call_statement;
@@ -808,7 +809,7 @@ Parser::parse_function_prototype ()
       return {};
     }
   cur = toks.at (pos);
-  if (cur.type != TokenType::TOKEN_TYPE_COLON)
+  if (cur.type != TokenType::TOKEN_TYPE_RLONGARROW)
     {
       // TODO: error -- unexpected token
       return {};

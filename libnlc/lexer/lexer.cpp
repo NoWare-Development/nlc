@@ -124,8 +124,7 @@ Lexer::tokenize (const std::string &src)
                     pos++;
                     break;
                   }
-
-                if (src.at (pos + 1) == '<')
+                else if (src.at (pos + 1) == '<')
                   {
                     if (pos + 2 < srclen && src.at (pos + 2) == '=')
                       {
@@ -135,6 +134,12 @@ Lexer::tokenize (const std::string &src)
                       }
 
                     out.emplace_back (TokenType::TOKEN_TYPE_SHL);
+                    pos++;
+                    break;
+                  }
+                else if (src.at (pos + 1) == '-')
+                  {
+                    out.emplace_back (TokenType::TOKEN_TYPE_LLONGARROW);
                     pos++;
                     break;
                   }
@@ -230,6 +235,12 @@ Lexer::tokenize (const std::string &src)
                 else if (c2 == '=')
                   {
                     out.emplace_back (TokenType::TOKEN_TYPE_MINUS_EQ);
+                    pos++;
+                    break;
+                  }
+                else if (c2 == '>')
+                  {
+                    out.emplace_back (TokenType::TOKEN_TYPE_RLONGARROW);
                     pos++;
                     break;
                   }
