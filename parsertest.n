@@ -45,3 +45,6 @@ func_def :: (arg1: type1, arg2: type2, arg3: *type3[4]) -> type_out {
 }
 
 func_call(123, 456, 789);
+
+funcptr: (arg1: type1, arg2: type2) -> type_out;
+funcptr_assign: (arg1: type1, arg2: type2) -> type_out = func_decl;

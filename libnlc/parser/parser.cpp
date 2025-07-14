@@ -655,14 +655,19 @@ Parser::parse_identifier_type ()
 CSTNode
 Parser::parse_identifier_type_raw ()
 {
+  auto cur = toks.at (pos);
+  if (cur.type == TokenType::TOKEN_TYPE_LPAREN)
+    {
+      return parse_identifier_type_raw_funcptr ();
+    }
   if (pos + 1 < tokenslen)
     {
-      auto cur = toks.at (pos + 1);
-      if (cur.type == TokenType::TOKEN_TYPE_LBRACK)
+      auto next = toks.at (pos + 1);
+      if (next.type == TokenType::TOKEN_TYPE_LBRACK)
         {
           return parse_identifier_type_raw_array ();
         }
-      else if (cur.type == TokenType::TOKEN_TYPE_LPAREN)
+      else if (next.type == TokenType::TOKEN_TYPE_LPAREN)
         {
           return parse_identifier_type_raw_funcptr ();
         }
@@ -707,35 +712,20 @@ CSTNode
 Parser::parse_identifier_type_raw_funcptr ()
 {
   CSTNode type_raw_funcptr (CSTNodeType::CST_NODE_TYPE_IDTYPERAW_FUNCPTR);
-  type_raw_funcptr.append (parse_identifier_type_raw ());
-
   if (pos >= tokenslen)
     {
       // TODO: error -- expected token
       return {};
     }
   auto cur = toks.at (pos);
-  if (cur.type != TokenType::TOKEN_TYPE_COLON_COLON)
-    {
-      // TODO: error -- unexpected token
-      return {};
-    }
-  pos++;
-
-  if (pos >= tokenslen)
-    {
-      // TODO: error -- expected token
-      return {};
-    }
-  cur = toks.at (pos);
   if (cur.type != TokenType::TOKEN_TYPE_LPAREN)
     {
       // TODO: error -- unexpected token
       return {};
     }
   pos++;
-
   auto id_create_list = parse_identifier_create_list ();
+  type_raw_funcptr.append (id_create_list);
   if (pos >= tokenslen)
     {
       // TODO: error -- expected token
@@ -748,6 +738,27 @@ Parser::parse_identifier_type_raw_funcptr ()
       return {};
     }
   pos++;
+
+  if (pos >= tokenslen)
+    {
+      // TODO: error -- expected token
+      return {};
+    }
+  cur = toks.at (pos);
+  if (cur.type != TokenType::TOKEN_TYPE_RLONGARROW)
+    {
+      // TODO: error -- unexpected token
+      return {};
+    }
+  pos++;
+
+  if (pos >= tokenslen)
+    {
+      // TODO: error -- expected token
+      return {};
+    }
+  auto return_type = parse_identifier_type ();
+  type_raw_funcptr.append (return_type);
 
   return type_raw_funcptr;
 }

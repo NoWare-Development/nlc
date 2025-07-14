@@ -274,7 +274,7 @@ private:
   // <idtyperaw>
   //   : <id>
   //   | <id>[<expr>]
-  //   | (<idcreatelist>): <id>
+  //   | (<idcreatelist>) -> <id>
   //   ;
   CSTNode parse_identifier_type_raw ();
   CSTNode parse_identifier_type_raw_plain (); // <id>

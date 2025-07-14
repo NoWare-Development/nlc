@@ -12,9 +12,17 @@ Token::to_string () const
   std::string out = "Token {";
 
   out += " type: ";
-  out += tokentype_to_string (type);
+  auto tokentype_str = tokentype_to_string (type);
+  out += tokentype_str;
+  out += ',';
+  size_t padding = 19 - tokentype_str.length (); // 19 is length of
+                                                 // the longest token type name
+  for (size_t i = 0; i < padding; i++)
+    {
+      out += ' ';
+    }
 
-  out += ", value: \"";
+  out += "value: \"";
   out += value;
   out += "\"";
 
