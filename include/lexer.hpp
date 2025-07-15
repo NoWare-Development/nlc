@@ -95,6 +95,7 @@ struct Token
       : line{ line }, end{ end }, len{ len }, type{ type }, value{ value }
   {
   }
+  Token () = default;
 
   std::string to_string () const;
 };

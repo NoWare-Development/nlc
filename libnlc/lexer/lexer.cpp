@@ -17,7 +17,10 @@ Lexer::tokenize (const std::string &src)
 
   while (_pos < _src.length ())
     {
+      skip_comments ();
+
       char c = _src.at (_pos);
+
       if (isspace (c))
         {
           if (c == '\n')
@@ -34,8 +37,6 @@ Lexer::tokenize (const std::string &src)
           out.push_back (process_err ());
           continue;
         }
-
-      skip_comments ();
 
       if (is_start_of_id (c))
         {
@@ -597,19 +598,24 @@ Lexer::process_err ()
 void
 Lexer::skip_comments ()
 {
+  if (_pos + 1 >= _src.length ())
+    return;
+
   char c1 = _src.at (_pos);
   char c2 = _src.at (_pos + 1);
   if (c1 == c2 && c2 == '/') // c++ comments
     {
       while (_pos < _src.length ())
         {
-          char c = _src.at (_pos++);
+          char c = _src.at (_pos);
           if (c == '\n')
             {
               _line++;
-              _llp = _pos + 1;
+              _pos++;
+              _llp = _pos;
               break;
             }
+          _pos++;
         }
     }
   else if (c1 == '/' && c2 == '*') // c comments
@@ -617,19 +623,23 @@ Lexer::skip_comments ()
       _pos += 2;
       while (_pos < _src.length ())
         {
-          char c = _src.at (_pos++);
+          char c = _src.at (_pos);
           if (c == '\n')
             {
               _line++;
-              _llp = _pos + 1;
+              _pos++;
+              _llp = _pos;
+              continue;
             }
 
-          char c2 = _src.at (_pos);
+          char c2 = _src.at (_pos + 1);
           if (c == '*' && c2 == '/')
             {
-              _pos++;
+              _pos += 2;
               break;
             }
+
+          _pos++;
         }
     }
 }

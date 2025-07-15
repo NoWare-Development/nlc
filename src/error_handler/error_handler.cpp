@@ -1,5 +1,6 @@
 #include "error_handler.hpp"
 #include "util.hpp"
+#include <iostream>
 
 bool
 ErrorHandler::handle_errored_tokens (
