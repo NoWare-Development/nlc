@@ -1,3 +1,3 @@
-libnlc_src += [
-  'libnlc/lexer.cpp',
-]
+subdir('lexer')
+
+subdir('util')

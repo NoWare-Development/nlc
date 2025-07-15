@@ -1,28 +1,30 @@
 project('nlc', 'cpp')
 
 libnlc_src = []
+libnlc_dep = []
 libnlc_inc = include_directories('include')
-libnlc_deps = [ dependency('llvm', version: '>=14.0.0') ]
-
 subdir('libnlc')
 
-src = []
-nlc_inc = include_directories('src/')
-
-subdir('src')
-
-libnlc = shared_library(
+libnlc_lib = shared_library(
   'nlc',
   libnlc_src,
+  dependencies: libnlc_dep,
   include_directories: libnlc_inc,
-  dependencies: libnlc_deps,
 )
 
-nlc = executable(
+libnlc = declare_dependency(
+  link_with: libnlc_lib,
+  include_directories: libnlc_inc,
+)
+
+nlc_src = []
+nlc_dep = []
+nlc_inc = include_directories('src')
+subdir('src')
+
+nlc_exe = executable(
   'nlc',
-  src,
-  include_directories: [ nlc_inc, libnlc_inc ],
-  link_with: libnlc,
+  nlc_src,
+  dependencies: libnlc,
+  include_directories: nlc_inc,
 )
-
-subdir('tests')
