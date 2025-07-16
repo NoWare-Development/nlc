@@ -1,0 +1,93 @@
+#pragma once
+
+#include "lexer.hpp"
+#include <string>
+#include <vector>
+namespace nlc
+{
+
+#define __NLC_CST_TYPE_DEFINE_(group, index)                                  \
+  ((((group) & 0xFF) << 8) | ((index) & 0xFF))
+#define __NLC_CST_TYPE_GROUP_(type) (((type) >> 8) & 0xFF)
+#define __NLC_CST_TYPE_INDEX_(type) ((type) & 0xFF)
+
+enum CSTType : unsigned short
+{
+  CST_PROG = __NLC_CST_TYPE_DEFINE_ (0, 0),
+  CST_STMTLIST = __NLC_CST_TYPE_DEFINE_ (0, 1),
+
+  CST_STMT_RETURN = __NLC_CST_TYPE_DEFINE_ (1, 0),
+  CST_STMT_IF = __NLC_CST_TYPE_DEFINE_ (1, 1),
+  CST_STMT_ELSE = __NLC_CST_TYPE_DEFINE_ (1, 2),
+  CST_STMT_SWITCH = __NLC_CST_TYPE_DEFINE_ (1, 3),
+  CST_STMT_GOTO = __NLC_CST_TYPE_DEFINE_ (1, 4),
+  CST_STMT_BREAK = __NLC_CST_TYPE_DEFINE_ (1, 5),
+  CST_STMT_CONTINUE = __NLC_CST_TYPE_DEFINE_ (1, 6),
+  CST_STMT_FOR = __NLC_CST_TYPE_DEFINE_ (1, 7),
+  CST_STMT_WHILE = __NLC_CST_TYPE_DEFINE_ (1, 8),
+  CST_STMT_LABEL = __NLC_CST_TYPE_DEFINE_ (1, 9),
+};
+
+struct CST
+{
+  CSTType type;
+  std::string value;
+  size_t depth = 0;
+  std::vector<CST> children{};
+
+  CST () = default;
+  CST (CSTType type, const std::string &value = "")
+      : type{ type }, value{ value }
+  {
+  }
+
+  void append (CST child);
+
+  std::string to_string () const;
+};
+
+class Parser
+{
+public:
+  enum ParserErrorType
+  {
+    PARSER_ERROR_UNK,
+    PARSER_ERROR_EXPECTED,
+    PARSER_ERROR_UNEXPECTED,
+  };
+  struct ParserError
+  {
+    std::string msg;
+    size_t pos;
+    ParserErrorType type;
+
+    ParserError () = default;
+    ParserError (size_t pos, ParserErrorType type, const std::string &msg = "")
+        : msg{ msg }, pos{ pos }, type{ type }
+    {
+    }
+
+    std::string to_string () const;
+  };
+
+  Parser (const std::vector<Token> &tokens) : _tokens (tokens) {}
+
+  CST parse ();
+
+  std::vector<ParserError> get_errors () const;
+
+private:
+  std::vector<ParserError> _errors{};
+  std::vector<Token> _tokens;
+  size_t _errored = false;
+  size_t _pos{};
+
+  void skip_until (TokenType type);
+
+  CST parse_statement ();
+  CST parse_return_statement ();
+
+  void add_error (const ParserError &err);
+};
+
+}

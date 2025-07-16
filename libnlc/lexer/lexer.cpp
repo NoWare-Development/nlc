@@ -66,34 +66,34 @@ Lexer::tokenize (const std::string &src)
 
         case '(':
           {
-            out.push_back (gen_token (1, _pos, TokenType::TOKEN_LPAREN));
+            out.push_back (gen_token (1, _pos, TokenType::TOKEN_LPAREN, "("));
             break;
           }
         case ')':
           {
-            out.push_back (gen_token (1, _pos, TokenType::TOKEN_RPAREN));
+            out.push_back (gen_token (1, _pos, TokenType::TOKEN_RPAREN, ")"));
             break;
           }
 
         case '[':
           {
-            out.push_back (gen_token (1, _pos, TokenType::TOKEN_LBRACK));
+            out.push_back (gen_token (1, _pos, TokenType::TOKEN_LBRACK, "["));
             break;
           }
         case ']':
           {
-            out.push_back (gen_token (1, _pos, TokenType::TOKEN_RBRACK));
+            out.push_back (gen_token (1, _pos, TokenType::TOKEN_RBRACK, "]"));
             break;
           }
 
         case '{':
           {
-            out.push_back (gen_token (1, _pos, TokenType::TOKEN_LBRACE));
+            out.push_back (gen_token (1, _pos, TokenType::TOKEN_LBRACE, "{"));
             break;
           }
         case '}':
           {
-            out.push_back (gen_token (1, _pos, TokenType::TOKEN_RBRACE));
+            out.push_back (gen_token (1, _pos, TokenType::TOKEN_RBRACE, "}"));
             break;
           }
 
@@ -103,7 +103,7 @@ Lexer::tokenize (const std::string &src)
             if (n1 == '=')
               {
                 out.push_back (
-                    gen_token (2, _pos + 1, TokenType::TOKEN_LTHANEQ));
+                    gen_token (2, _pos + 1, TokenType::TOKEN_LTHANEQ, "<="));
                 _pos += 2;
                 continue;
               }
@@ -112,23 +112,24 @@ Lexer::tokenize (const std::string &src)
                 char n2 = peek (_pos + 2);
                 if (n2 == '=')
                   {
-                    out.push_back (
-                        gen_token (3, _pos + 2, TokenType::TOKEN_SHLEQ));
+                    out.push_back (gen_token (3, _pos + 2,
+                                              TokenType::TOKEN_SHLEQ, "<<="));
                     _pos += 3;
                     continue;
                   }
-                out.push_back (gen_token (2, _pos + 1, TokenType::TOKEN_SHL));
+                out.push_back (
+                    gen_token (2, _pos + 1, TokenType::TOKEN_SHL, "<<"));
                 _pos += 2;
                 continue;
               }
             else if (n1 == '-')
               {
                 out.push_back (
-                    gen_token (2, _pos + 1, TokenType::TOKEN_LARROW));
+                    gen_token (2, _pos + 1, TokenType::TOKEN_LARROW, "<-"));
                 _pos += 2;
                 continue;
               }
-            out.push_back (gen_token (1, _pos, TokenType::TOKEN_LTHAN));
+            out.push_back (gen_token (1, _pos, TokenType::TOKEN_LTHAN, "<"));
             break;
           }
         case '>':
@@ -137,7 +138,7 @@ Lexer::tokenize (const std::string &src)
             if (n1 == '=')
               {
                 out.push_back (
-                    gen_token (2, _pos + 1, TokenType::TOKEN_GTHANEQ));
+                    gen_token (2, _pos + 1, TokenType::TOKEN_GTHANEQ, ">="));
                 _pos += 2;
                 continue;
               }
@@ -146,16 +147,17 @@ Lexer::tokenize (const std::string &src)
                 char n2 = peek (_pos + 2);
                 if (n2 == '=')
                   {
-                    out.push_back (
-                        gen_token (3, _pos + 2, TokenType::TOKEN_SHREQ));
+                    out.push_back (gen_token (3, _pos + 2,
+                                              TokenType::TOKEN_SHREQ, ">>="));
                     _pos += 3;
                     continue;
                   }
-                out.push_back (gen_token (2, _pos + 1, TokenType::TOKEN_SHR));
+                out.push_back (
+                    gen_token (2, _pos + 1, TokenType::TOKEN_SHR, ">>"));
                 _pos += 2;
                 continue;
               }
-            out.push_back (gen_token (1, _pos, TokenType::TOKEN_GTHAN));
+            out.push_back (gen_token (1, _pos, TokenType::TOKEN_GTHAN, ">"));
             break;
           }
 
@@ -165,11 +167,11 @@ Lexer::tokenize (const std::string &src)
             if (n1 == '=')
               {
                 out.push_back (
-                    gen_token (2, _pos + 1, TokenType::TOKEN_ADDEQ));
+                    gen_token (2, _pos + 1, TokenType::TOKEN_ADDEQ, "+="));
                 _pos += 2;
                 continue;
               }
-            out.push_back (gen_token (1, _pos, TokenType::TOKEN_ADD));
+            out.push_back (gen_token (1, _pos, TokenType::TOKEN_ADD, "+"));
             break;
           }
         case '-':
@@ -178,18 +180,18 @@ Lexer::tokenize (const std::string &src)
             if (n1 == '>')
               {
                 out.push_back (
-                    gen_token (2, _pos + 1, TokenType::TOKEN_RARROW));
+                    gen_token (2, _pos + 1, TokenType::TOKEN_RARROW, "->"));
                 _pos += 2;
                 continue;
               }
             else if (n1 == '=')
               {
                 out.push_back (
-                    gen_token (2, _pos + 1, TokenType::TOKEN_SUBEQ));
+                    gen_token (2, _pos + 1, TokenType::TOKEN_SUBEQ, "-="));
                 _pos += 2;
                 continue;
               }
-            out.push_back (gen_token (1, _pos, TokenType::TOKEN_SUB));
+            out.push_back (gen_token (1, _pos, TokenType::TOKEN_SUB, "-"));
             break;
           }
         case '*':
@@ -198,11 +200,11 @@ Lexer::tokenize (const std::string &src)
             if (n1 == '=')
               {
                 out.push_back (
-                    gen_token (2, _pos + 1, TokenType::TOKEN_MULEQ));
+                    gen_token (2, _pos + 1, TokenType::TOKEN_MULEQ, "*="));
                 _pos += 2;
                 continue;
               }
-            out.push_back (gen_token (1, _pos, TokenType::TOKEN_MUL));
+            out.push_back (gen_token (1, _pos, TokenType::TOKEN_MUL, "*"));
             break;
           }
         case '/':
@@ -211,11 +213,11 @@ Lexer::tokenize (const std::string &src)
             if (n1 == '=')
               {
                 out.push_back (
-                    gen_token (2, _pos + 1, TokenType::TOKEN_DIVEQ));
+                    gen_token (2, _pos + 1, TokenType::TOKEN_DIVEQ, "/="));
                 _pos += 2;
                 continue;
               }
-            out.push_back (gen_token (1, _pos, TokenType::TOKEN_DIV));
+            out.push_back (gen_token (1, _pos, TokenType::TOKEN_DIV, "/"));
             break;
           }
         case '%':
@@ -224,11 +226,11 @@ Lexer::tokenize (const std::string &src)
             if (n1 == '=')
               {
                 out.push_back (
-                    gen_token (2, _pos + 1, TokenType::TOKEN_MODEQ));
+                    gen_token (2, _pos + 1, TokenType::TOKEN_MODEQ, "%="));
                 _pos += 2;
                 continue;
               }
-            out.push_back (gen_token (1, _pos, TokenType::TOKEN_MOD));
+            out.push_back (gen_token (1, _pos, TokenType::TOKEN_MOD, "%"));
             break;
           }
 
@@ -237,18 +239,19 @@ Lexer::tokenize (const std::string &src)
             char n1 = peek (_pos + 1);
             if (n1 == '&')
               {
-                out.push_back (gen_token (2, _pos + 1, TokenType::TOKEN_AND));
+                out.push_back (
+                    gen_token (2, _pos + 1, TokenType::TOKEN_AND, "&&"));
                 _pos += 2;
                 continue;
               }
             else if (n1 == '=')
               {
                 out.push_back (
-                    gen_token (2, _pos + 1, TokenType::TOKEN_BANDEQ));
+                    gen_token (2, _pos + 1, TokenType::TOKEN_BANDEQ, "&="));
                 _pos += 2;
                 continue;
               }
-            out.push_back (gen_token (1, _pos, TokenType::TOKEN_BAND));
+            out.push_back (gen_token (1, _pos, TokenType::TOKEN_BAND, "&"));
             break;
           }
         case '|':
@@ -256,18 +259,19 @@ Lexer::tokenize (const std::string &src)
             char n1 = peek (_pos + 1);
             if (n1 == '|')
               {
-                out.push_back (gen_token (2, _pos + 1, TokenType::TOKEN_OR));
+                out.push_back (
+                    gen_token (2, _pos + 1, TokenType::TOKEN_OR, "||"));
                 _pos += 2;
                 continue;
               }
             else if (n1 == '=')
               {
                 out.push_back (
-                    gen_token (2, _pos + 1, TokenType::TOKEN_BOREQ));
+                    gen_token (2, _pos + 1, TokenType::TOKEN_BOREQ, "|="));
                 _pos += 2;
                 continue;
               }
-            out.push_back (gen_token (1, _pos, TokenType::TOKEN_BOR));
+            out.push_back (gen_token (1, _pos, TokenType::TOKEN_BOR, "|"));
             break;
           }
         case '^':
@@ -276,11 +280,11 @@ Lexer::tokenize (const std::string &src)
             if (n1 == '=')
               {
                 out.push_back (
-                    gen_token (2, _pos + 1, TokenType::TOKEN_BXOREQ));
+                    gen_token (2, _pos + 1, TokenType::TOKEN_BXOREQ, "^="));
                 _pos += 2;
                 continue;
               }
-            out.push_back (gen_token (1, _pos, TokenType::TOKEN_BXOR));
+            out.push_back (gen_token (1, _pos, TokenType::TOKEN_BXOR, "^"));
             break;
           }
 
@@ -289,11 +293,12 @@ Lexer::tokenize (const std::string &src)
             char n1 = peek (_pos + 1);
             if (n1 == '=')
               {
-                out.push_back (gen_token (2, _pos + 1, TokenType::TOKEN_EQEQ));
+                out.push_back (
+                    gen_token (2, _pos + 1, TokenType::TOKEN_EQEQ, "=="));
                 _pos += 2;
                 continue;
               }
-            out.push_back (gen_token (1, _pos, TokenType::TOKEN_EQ));
+            out.push_back (gen_token (1, _pos, TokenType::TOKEN_EQ, "="));
             break;
           }
 
@@ -303,17 +308,17 @@ Lexer::tokenize (const std::string &src)
             if (n1 == '=')
               {
                 out.push_back (
-                    gen_token (2, _pos + 1, TokenType::TOKEN_NOTEQ));
+                    gen_token (2, _pos + 1, TokenType::TOKEN_NOTEQ, "!="));
                 _pos += 2;
                 continue;
               }
-            out.push_back (gen_token (1, _pos, TokenType::TOKEN_NOT));
+            out.push_back (gen_token (1, _pos, TokenType::TOKEN_NOT, "!"));
             break;
           }
 
         case '@':
           {
-            out.push_back (gen_token (1, _pos, TokenType::TOKEN_AT));
+            out.push_back (gen_token (1, _pos, TokenType::TOKEN_AT, "@"));
             break;
           }
 
@@ -323,41 +328,41 @@ Lexer::tokenize (const std::string &src)
             if (n1 == ':')
               {
                 out.push_back (
-                    gen_token (2, _pos + 1, TokenType::TOKEN_DCOLON));
+                    gen_token (2, _pos + 1, TokenType::TOKEN_DCOLON, "::"));
                 _pos += 2;
                 continue;
               }
-            out.push_back (gen_token (1, _pos, TokenType::TOKEN_COLON));
+            out.push_back (gen_token (1, _pos, TokenType::TOKEN_COLON, ":"));
             break;
           }
 
         case ';':
           {
-            out.push_back (gen_token (1, _pos, TokenType::TOKEN_SEMI));
+            out.push_back (gen_token (1, _pos, TokenType::TOKEN_SEMI, ";"));
             break;
           }
 
         case '#':
           {
-            out.push_back (gen_token (1, _pos, TokenType::TOKEN_HASH));
+            out.push_back (gen_token (1, _pos, TokenType::TOKEN_HASH, "#"));
             break;
           }
 
         case '.':
           {
-            out.push_back (gen_token (1, _pos, TokenType::TOKEN_PERIOD));
+            out.push_back (gen_token (1, _pos, TokenType::TOKEN_PERIOD, "."));
             break;
           }
 
         case ',':
           {
-            out.push_back (gen_token (1, _pos, TokenType::TOKEN_COMMA));
+            out.push_back (gen_token (1, _pos, TokenType::TOKEN_COMMA, ","));
             break;
           }
 
         case '?':
           {
-            out.push_back (gen_token (1, _pos, TokenType::TOKEN_QUE));
+            out.push_back (gen_token (1, _pos, TokenType::TOKEN_QUE, "?"));
             break;
           }
 
