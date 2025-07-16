@@ -1,5 +1,4 @@
 #include "parser.hpp"
-#include <string>
 
 namespace nlc
 {
@@ -27,32 +26,6 @@ Parser::get_errors () const
   return _errors;
 }
 
-CST
-Parser::parse_statement ()
-{
-  auto cur = _tokens.at (_pos);
-  if (cur.type == TokenType::TOKEN_ID)
-    {
-      if (cur.value == "return")
-        {
-          return parse_return_statement ();
-        }
-    }
-  add_error (Parser::ParserError (
-      _pos, Parser::ParserErrorType::PARSER_ERROR_UNEXPECTED, cur.value));
-  _pos++;
-  return {};
-}
-
-CST
-Parser::parse_return_statement ()
-{
-  CST return_statement (CSTType::CST_STMT_RETURN);
-  skip_until (TokenType::TOKEN_SEMI);
-  _pos++;
-  return return_statement;
-}
-
 void
 Parser::skip_until (TokenType type)
 {
@@ -74,24 +47,28 @@ Parser::add_error (const Parser::ParserError &err)
   _errored = true;
 }
 
-std::string
-Parser::ParserError::to_string () const
+bool
+Parser::verify_pos (size_t pos)
 {
-  std::string out{};
-  out += "Parser::ParserError { ";
+  if (pos >= _tokens.size ())
+    {
+      add_error (Parser::ParserError (
+          pos, Parser::ParserErrorType::PARSER_ERROR_EXPECTED));
+      return false;
+    }
+  return true;
+}
 
-  out += "msg: \"";
-  out += msg;
-  out += "\"";
-
-  out += ", pos: ";
-  out += std::to_string (pos);
-
-  out += ", type: ";
-  out += std::to_string (type);
-
-  out += " }";
-  return out;
+bool
+Parser::verify_tokentype (size_t pos, TokenType got, TokenType expected)
+{
+  if (got != expected)
+    {
+      add_error (Parser::ParserError (
+          pos, Parser::ParserErrorType::PARSER_ERROR_UNEXPECTED));
+      return false;
+    }
+  return true;
 }
 
 }

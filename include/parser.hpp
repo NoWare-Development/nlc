@@ -66,8 +66,6 @@ public:
         : msg{ msg }, pos{ pos }, type{ type }
     {
     }
-
-    std::string to_string () const;
   };
 
   Parser (const std::vector<Token> &tokens) : _tokens (tokens) {}
@@ -84,10 +82,29 @@ private:
 
   void skip_until (TokenType type);
 
+  // <stmt>
+  //   : { <stmtlist> }
+  //   | <idcreatestmt>
+  //   | return <expr>;
+  //   | if (<expr>) <stmt>
+  //   | else <stmt>
+  //   | switch (<expr>) { <casestmtlist> }
+  //   | goto @<id>;
+  //   | break;
+  //   | continue;
+  //   | for (<stmt>; <expr>; <expr>) <stmt>
+  //   | while (<expr>) <stmt>
+  //   | @<label>:
+  //   ;
   CST parse_statement ();
-  CST parse_return_statement ();
+  CST parse_goto_statement ();   // goto @<id>;
+  CST parse_return_statement (); // return <expr>;
+  CST parse_label_statement ();  // @<label>:
 
   void add_error (const ParserError &err);
+
+  bool verify_pos (size_t pos);
+  bool verify_tokentype (size_t pos, TokenType got, TokenType expected);
 };
 
 }

@@ -41,11 +41,12 @@ main (int argc, char **argv)
   auto csts = parser.parse ();
   auto errors = parser.get_errors ();
   handler.add_parser_errors (errors);
+  std::cout << csts.to_string ();
+  std::cout << '\n';
   if (!handler.handle_parser_errors ())
     {
       return -3;
     }
-  std::cout << '\n';
 
   return 0;
 }
