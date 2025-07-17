@@ -102,8 +102,10 @@ private:
   //   | import <module>;
   //   ;
   CST parse_statement ();
-  CST parse_goto_statement ();   // goto @<id>;
   CST parse_return_statement (); // return <expr>;
+  CST parse_if_statement ();     // if (<expr>) <stmt>
+  CST parse_else_statement ();   // else <stmt>
+  CST parse_goto_statement ();   // goto @<id>;
   CST parse_label_statement ();  // @<label>:
   CST parse_import_statement (); // import <module>;
 

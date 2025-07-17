@@ -13,5 +13,8 @@ main :: (argc: int, argc: **char) -> int {
   c: char = '';
   c >>= 5;
 
+  if (test) return 0x20;
+  else return 0x30;
+
   goto @label;
 }

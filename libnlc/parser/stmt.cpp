@@ -15,6 +15,14 @@ Parser::parse_statement ()
           {
             return parse_return_statement ();
           }
+        else if (cur.value == "if")
+          {
+            return parse_if_statement ();
+          }
+        else if (cur.value == "else")
+          {
+            return parse_else_statement ();
+          }
         else if (cur.value == "goto")
           {
             return parse_goto_statement ();
@@ -39,6 +47,77 @@ Parser::parse_statement ()
       _pos, Parser::ParserErrorType::PARSER_ERROR_UNEXPECTED, cur.value));
   _pos++;
   return {};
+}
+
+CST
+Parser::parse_return_statement ()
+{
+  CST return_statement (CSTType::CST_STMT_RETURN);
+  skip_until (TokenType::TOKEN_SEMI); // TODO: parse expression
+  if (!verify_pos (_pos))
+    {
+      return {};
+    }
+  auto cur = _tokens.at (_pos);
+  if (!verify_tokentype (_pos, cur.type, TokenType::TOKEN_SEMI))
+    {
+      return {};
+    }
+  _pos++;
+  return return_statement;
+}
+
+CST
+Parser::parse_if_statement ()
+{
+  CST if_statement (CSTType::CST_STMT_IF);
+  _pos++;
+  if (!verify_pos (_pos))
+    {
+      return {};
+    }
+  auto cur = _tokens.at (_pos);
+  if (!verify_tokentype (_pos, cur.type, TokenType::TOKEN_LPAREN))
+    {
+      return {};
+    }
+
+  _pos++;
+  if (!verify_pos (_pos))
+    {
+      return {};
+    }
+  skip_until (TokenType::TOKEN_RPAREN); // TODO: parse expression
+  if (!verify_pos (_pos))
+    {
+      return {};
+    }
+  _pos++;
+
+  if (!verify_pos (_pos))
+    {
+      return {};
+    }
+  auto statement = parse_statement ();
+  if_statement.append (statement);
+
+  return if_statement;
+}
+
+CST
+Parser::parse_else_statement ()
+{
+  CST else_statement (CSTType::CST_STMT_ELSE);
+
+  _pos++;
+  if (!verify_pos (_pos))
+    {
+      return {};
+    }
+  auto statement = parse_statement ();
+  else_statement.append (statement);
+
+  return else_statement;
 }
 
 CST
@@ -82,15 +161,6 @@ Parser::parse_goto_statement ()
   _pos++;
 
   return goto_statement;
-}
-
-CST
-Parser::parse_return_statement ()
-{
-  CST return_statement (CSTType::CST_STMT_RETURN);
-  skip_until (TokenType::TOKEN_SEMI);
-  _pos++;
-  return return_statement;
 }
 
 CST
