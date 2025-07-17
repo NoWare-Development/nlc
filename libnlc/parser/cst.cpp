@@ -8,8 +8,18 @@ std::string csttype_to_string (CSTType type);
 void
 CST::append (CST child)
 {
-  child.depth = depth + 1;
+  child.change_depth (depth + 1);
   children.push_back (child);
+}
+
+void
+CST::change_depth (size_t depth)
+{
+  this->depth = depth;
+  for (auto &child : children)
+    {
+      child.change_depth (depth + 1);
+    }
 }
 
 std::string
@@ -60,6 +70,7 @@ csttype_to_string (CSTType type)
         // Groupless
         "PROG",
         "STMTLIST",
+        "MODULE",
     },
     {
         // STMT
@@ -73,6 +84,7 @@ csttype_to_string (CSTType type)
         "FOR",
         "WHILE",
         "LABEL",
+        "IMPORT",
     },
   };
 

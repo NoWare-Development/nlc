@@ -19,6 +19,10 @@ Parser::parse_statement ()
           {
             return parse_goto_statement ();
           }
+        else if (cur.value == "import")
+          {
+            return parse_import_statement ();
+          }
       }
       break;
 
@@ -116,6 +120,34 @@ Parser::parse_label_statement ()
     }
   _pos++;
   return label_statement;
+}
+
+CST
+Parser::parse_import_statement ()
+{
+  CST import_statement (CSTType::CST_STMT_IMPORT);
+
+  _pos++;
+  if (!verify_pos (_pos))
+    {
+      return {};
+    }
+
+  auto module = parse_module ();
+  import_statement.append (module);
+
+  if (!verify_pos (_pos))
+    {
+      return {};
+    }
+  auto cur = _tokens.at (_pos);
+  if (!verify_tokentype (_pos, cur.type, TokenType::TOKEN_SEMI))
+    {
+      return {};
+    }
+  _pos++;
+
+  return import_statement;
 }
 
 }

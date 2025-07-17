@@ -3,6 +3,7 @@
 #include "lexer.hpp"
 #include <string>
 #include <vector>
+
 namespace nlc
 {
 
@@ -15,6 +16,7 @@ enum CSTType : unsigned short
 {
   CST_PROG = __NLC_CST_TYPE_DEFINE_ (0, 0),
   CST_STMTLIST = __NLC_CST_TYPE_DEFINE_ (0, 1),
+  CST_MODULE = __NLC_CST_TYPE_DEFINE_ (0, 2),
 
   CST_STMT_RETURN = __NLC_CST_TYPE_DEFINE_ (1, 0),
   CST_STMT_IF = __NLC_CST_TYPE_DEFINE_ (1, 1),
@@ -26,6 +28,7 @@ enum CSTType : unsigned short
   CST_STMT_FOR = __NLC_CST_TYPE_DEFINE_ (1, 7),
   CST_STMT_WHILE = __NLC_CST_TYPE_DEFINE_ (1, 8),
   CST_STMT_LABEL = __NLC_CST_TYPE_DEFINE_ (1, 9),
+  CST_STMT_IMPORT = __NLC_CST_TYPE_DEFINE_ (1, 10),
 };
 
 struct CST
@@ -42,6 +45,7 @@ struct CST
   }
 
   void append (CST child);
+  void change_depth (size_t depth);
 
   std::string to_string () const;
 };
@@ -95,11 +99,19 @@ private:
   //   | for (<stmt>; <expr>; <expr>) <stmt>
   //   | while (<expr>) <stmt>
   //   | @<label>:
+  //   | import <module>;
   //   ;
   CST parse_statement ();
   CST parse_goto_statement ();   // goto @<id>;
   CST parse_return_statement (); // return <expr>;
   CST parse_label_statement ();  // @<label>:
+  CST parse_import_statement (); // import <module>;
+
+  // <module>
+  //   : <id>.<module>
+  //   | <id>
+  //   ;
+  CST parse_module ();
 
   void add_error (const ParserError &err);
 

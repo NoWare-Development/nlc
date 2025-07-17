@@ -9,13 +9,13 @@ Parser::parse ()
   CST prog (CSTType::CST_PROG);
   while (_pos < _tokens.size ())
     {
-      auto result = parse_statement ();
+      auto statement = parse_statement ();
       if (_errored)
         {
           _errored = false;
           continue;
         }
-      prog.append (result);
+      prog.append (statement);
     }
   return prog;
 }
