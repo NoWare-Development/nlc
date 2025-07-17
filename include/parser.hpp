@@ -102,12 +102,14 @@ private:
   //   | import <module>;
   //   ;
   CST parse_statement ();
-  CST parse_return_statement (); // return <expr>;
-  CST parse_if_statement ();     // if (<expr>) <stmt>
-  CST parse_else_statement ();   // else <stmt>
-  CST parse_goto_statement ();   // goto @<id>;
-  CST parse_label_statement ();  // @<label>:
-  CST parse_import_statement (); // import <module>;
+  CST parse_return_statement ();   // return <expr>;
+  CST parse_if_statement ();       // if (<expr>) <stmt>
+  CST parse_else_statement ();     // else <stmt>
+  CST parse_goto_statement ();     // goto @<id>;
+  CST parse_break_statement ();    // break;
+  CST parse_continue_statement (); // continue;
+  CST parse_label_statement ();    // @<label>:
+  CST parse_import_statement ();   // import <module>;
 
   // <module>
   //   : <id>.<module>

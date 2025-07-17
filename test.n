@@ -17,4 +17,7 @@ main :: (argc: int, argc: **char) -> int {
   else return 0x30;
 
   goto @label;
+
+  break;
+  continue;
 }

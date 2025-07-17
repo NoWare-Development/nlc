@@ -27,9 +27,25 @@ Parser::parse_statement ()
           {
             return parse_goto_statement ();
           }
+        else if (cur.value == "break")
+          {
+            return parse_break_statement ();
+          }
+        else if (cur.value == "continue")
+          {
+            return parse_continue_statement ();
+          }
         else if (cur.value == "import")
           {
             return parse_import_statement ();
+          }
+        else if (cur.value == "break")
+          {
+            return parse_break_statement ();
+          }
+        else if (cur.value == "continue")
+          {
+            return parse_continue_statement ();
           }
       }
       break;
@@ -161,6 +177,46 @@ Parser::parse_goto_statement ()
   _pos++;
 
   return goto_statement;
+}
+
+CST
+Parser::parse_break_statement ()
+{
+  CST break_statement (CSTType::CST_STMT_BREAK);
+
+  _pos++;
+  if (!verify_pos (_pos))
+    {
+      return {};
+    }
+  auto cur = _tokens.at (_pos);
+  if (!verify_tokentype (_pos, cur.type, TokenType::TOKEN_SEMI))
+    {
+      return {};
+    }
+  _pos++;
+
+  return break_statement;
+}
+
+CST
+Parser::parse_continue_statement ()
+{
+  CST continue_statement (CSTType::CST_STMT_CONTINUE);
+
+  _pos++;
+  if (!verify_pos (_pos))
+    {
+      return {};
+    }
+  auto cur = _tokens.at (_pos);
+  if (!verify_tokentype (_pos, cur.type, TokenType::TOKEN_SEMI))
+    {
+      return {};
+    }
+  _pos++;
+
+  return continue_statement;
 }
 
 CST
