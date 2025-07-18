@@ -61,9 +61,6 @@ ErrorHandler::print_errored_tokens () const
 
   std::vector<nlc::Token> invalid_tokens = get_invalid_tokens (_tokens);
 
-  std::cout << std::to_string (invalid_tokens.size ()) << " "
-            << error_or_errors[invalid_tokens.size () > 1]
-            << " has occured during \"" << _filename << "\" compilation:\n";
   for (auto &tok : invalid_tokens)
     {
       std::cout << get_token_error (tok) << '\n';
@@ -73,9 +70,6 @@ ErrorHandler::print_errored_tokens () const
 void
 ErrorHandler::print_parser_errors () const
 {
-  std::cout << std::to_string (_parser_errors.size ()) << " "
-            << error_or_errors[_parser_errors.size () > 1]
-            << " has occured during \"" << _filename << "\" compilation:\n";
   for (auto &err : _parser_errors)
     {
       std::cout << get_parser_error (err) << '\n';
@@ -88,7 +82,7 @@ ErrorHandler::get_token_error (const nlc::Token &tok) const
   std::string error_string{};
   error_string += "Failed to process token \"";
   error_string += tok.value;
-  error_string += "\" ";
+  error_string += "\" in file \"" + _filename + "\" ";
   error_string += "at (" + std::to_string (tok.line + 1) + ":"
                   + std::to_string (tok.end - (tok.len - 1)) + ")";
   error_string += '\n';
@@ -104,7 +98,8 @@ ErrorHandler::get_parser_error (const nlc::Parser::ParserError &err) const
   std::string error_string{};
 
   auto &tok = _tokens.at (err.pos);
-  error_string += "Failed to parse: " + get_parser_error_reason (err) + " at ("
+  error_string += "Failed to parse: " + get_parser_error_reason (err)
+                  + " in file \"" + _filename + "\" at ("
                   + std::to_string (tok.line + 1) + ":"
                   + std::to_string (tok.end - (tok.len - 1)) + ")";
   error_string += '\n';

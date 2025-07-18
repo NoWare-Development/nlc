@@ -590,14 +590,15 @@ Lexer::process_err ()
   size_t start = _pos;
   while (_pos < _src.length ())
     {
-      char c = _src.at (_pos++);
+      char c = _src.at (_pos);
       if (is_processable (c) || isspace (c))
         {
           break;
         }
+      _pos++;
       errbuf += c;
     }
-  return gen_token (_pos - 1 - start, _pos - 1, TokenType::TOKEN_ERR, errbuf);
+  return gen_token (_pos - start, _pos - 1, TokenType::TOKEN_ERR, errbuf);
 }
 
 void
