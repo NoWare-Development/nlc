@@ -108,6 +108,8 @@ private:
   CST parse_goto_statement ();     // goto @<id>;
   CST parse_break_statement ();    // break;
   CST parse_continue_statement (); // continue;
+  CST parse_for_statement ();      // for (<stmt>; <expr>; <expr>) <stmt>
+  CST parse_while_statement ();    // while (<expr>) <stmt>
   CST parse_label_statement ();    // @<label>:
   CST parse_import_statement ();   // import <module>;
 

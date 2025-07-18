@@ -35,6 +35,14 @@ Parser::parse_statement ()
           {
             return parse_continue_statement ();
           }
+        else if (cur.value == "for")
+          {
+            return parse_for_statement ();
+          }
+        else if (cur.value == "while")
+          {
+            return parse_while_statement ();
+          }
         else if (cur.value == "import")
           {
             return parse_import_statement ();
@@ -217,6 +225,83 @@ Parser::parse_continue_statement ()
   _pos++;
 
   return continue_statement;
+}
+
+CST
+Parser::parse_for_statement ()
+{
+  CST for_statement (CSTType::CST_STMT_FOR);
+
+  _pos++;
+  if (!verify_pos (_pos))
+    {
+      return {};
+    }
+  auto cur = _tokens.at (_pos);
+  if (!verify_tokentype (_pos, cur.type, TokenType::TOKEN_LPAREN))
+    {
+      return {};
+    }
+
+  _pos++;
+  if (!verify_pos (_pos))
+    {
+      return {};
+    }
+
+  skip_until (TokenType::TOKEN_RPAREN); // TODO: parse expression
+  cur = _tokens.at (_pos);
+  if (!verify_tokentype (_pos, cur.type, TokenType::TOKEN_RPAREN))
+    {
+      return {};
+    }
+
+  _pos++;
+  if (!verify_pos (_pos))
+    {
+      return {};
+    }
+
+  auto statement = parse_statement ();
+  for_statement.append (statement);
+
+  return for_statement;
+}
+
+CST
+Parser::parse_while_statement ()
+{
+  CST while_statement (CSTType::CST_STMT_WHILE);
+
+  _pos++;
+  if (!verify_pos (_pos))
+    {
+      return {};
+    }
+  auto cur = _tokens.at (_pos);
+  if (!verify_tokentype (_pos, cur.type, TokenType::TOKEN_LPAREN))
+    {
+      return {};
+    }
+  _pos++;
+  if (!verify_pos (_pos))
+    {
+      return {};
+    }
+  skip_until (TokenType::TOKEN_RPAREN); // TODO: parse expression
+  if (!verify_pos (_pos))
+    {
+      return {};
+    }
+  _pos++;
+  if (!verify_pos (_pos))
+    {
+      return {};
+    }
+  auto statement = parse_statement ();
+  while_statement.append (statement);
+
+  return while_statement;
 }
 
 CST

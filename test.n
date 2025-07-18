@@ -20,4 +20,8 @@ main :: (argc: int, argc: **char) -> int {
 
   break;
   continue;
+
+  for () return 30;
+
+  while () return 20;
 }
