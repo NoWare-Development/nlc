@@ -1,7 +1,5 @@
 #include "util.hpp"
-
-namespace nlc
-{
+#include <string>
 
 static const char *prefix_ = "\033[";
 static const char *suffix_ = "m";
@@ -38,6 +36,4 @@ escape_graphics (ESCGraphics mode)
   out += gmodes_[mode];
   out += suffix_;
   return out;
-}
-
 }

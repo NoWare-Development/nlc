@@ -1,6 +1,7 @@
 #pragma once
 
 #include "parser.hpp"
+#include "util/util.hpp"
 #include <lexer.hpp>
 #include <vector>
 
@@ -31,7 +32,8 @@ private:
   std::string get_token_error (const nlc::Token &tok) const;
   std::string get_parser_error (const nlc::Parser::ParserError &err) const;
 
-  std::string get_highlighted_token (const nlc::Token &tok) const;
+  std::string get_highlighted_token (const nlc::Token &tok,
+                                     ESCColor color) const;
 
   std::string
   get_parser_error_reason (const nlc::Parser::ParserError &err) const;

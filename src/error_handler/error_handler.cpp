@@ -1,6 +1,6 @@
 #include "error_handler.hpp"
+#include "../util/util.hpp"
 #include "lexer.hpp"
-#include "util.hpp"
 #include <iostream>
 #include <string>
 
@@ -87,7 +87,7 @@ ErrorHandler::get_token_error (const nlc::Token &tok) const
                   + std::to_string (tok.end - (tok.len - 1)) + ")";
   error_string += '\n';
 
-  error_string += get_highlighted_token (tok);
+  error_string += get_highlighted_token (tok, ESCColor::ESCCOLOR_RED);
 
   return error_string;
 }
@@ -104,13 +104,14 @@ ErrorHandler::get_parser_error (const nlc::Parser::ParserError &err) const
                   + std::to_string (tok.end - (tok.len - 1)) + ")";
   error_string += '\n';
 
-  error_string += get_highlighted_token (tok);
+  error_string += get_highlighted_token (tok, ESCColor::ESCCOLOR_RED);
 
   return error_string;
 }
 
 std::string
-ErrorHandler::get_highlighted_token (const nlc::Token &tok) const
+ErrorHandler::get_highlighted_token (const nlc::Token &tok,
+                                     ESCColor color) const
 {
   std::string out{};
 
@@ -124,15 +125,15 @@ ErrorHandler::get_highlighted_token (const nlc::Token &tok) const
     {
       out += ' ';
     }
-  out += nlc::escape_color (nlc::ESCColor::ESCCOLOR_RED);
-  out += nlc::escape_graphics (nlc::ESCGraphics::ESCGRAPHICS_BOLD);
+  out += escape_color (color);
+  out += escape_graphics (ESCGraphics::ESCGRAPHICS_BOLD);
   out += '^';
 
   for (size_t i = 0; i < tok.len - 1; i++)
     {
       out += '~';
     }
-  out += nlc::escape_reset ();
+  out += escape_reset ();
   return out;
 }
 

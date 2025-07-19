@@ -2,9 +2,6 @@
 
 #include <string>
 
-namespace nlc
-{
-
 enum ESCColor
 {
   ESCCOLOR_BLACK,
@@ -33,5 +30,3 @@ enum ESCGraphics
 std::string escape_reset ();
 std::string escape_color (ESCColor col);
 std::string escape_graphics (ESCGraphics mode);
-
-}

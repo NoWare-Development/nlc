@@ -106,7 +106,6 @@ public:
   Lexer () = default;
 
   std::vector<Token> tokenize (const std::string &src);
-  std::vector<std::string> get_errors (const std::vector<Token> &toks) const;
 
 private:
   std::string _src{};
@@ -134,10 +133,6 @@ private:
   char peek (size_t pos) const;
 
   char get_spec_char (char c);
-
-  std::string get_error (const Token &tok) const;
-
-  std::string get_line (size_t linenum) const;
 
   bool is_processable (char c) const;
 };

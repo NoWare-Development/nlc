@@ -1,5 +1,4 @@
 #include "lexer.hpp"
-#include "util.hpp"
 #include <cctype>
 #include <vector>
 
@@ -376,20 +375,6 @@ Lexer::tokenize (const std::string &src)
   return out;
 }
 
-std::vector<std::string>
-Lexer::get_errors (const std::vector<Token> &toks) const
-{
-  std::vector<std::string> out{};
-  for (auto tok : toks)
-    {
-      if (tok.type == TokenType::TOKEN_ERR)
-        {
-          out.emplace_back (get_error (tok));
-        }
-    }
-  return out;
-}
-
 Token
 Lexer::process_id ()
 {
@@ -694,66 +679,6 @@ Lexer::get_spec_char (char c)
     case 'r':
       return '\r';
     }
-}
-
-std::string
-Lexer::get_error (const Token &tok) const
-{
-  std::string error_string{};
-  error_string += "Failed to process token \"";
-  error_string += tok.value;
-  error_string += "\" ";
-  error_string += "at (" + std::to_string (tok.line + 1) + ":"
-                  + std::to_string (tok.end - (tok.len - 1)) + ")";
-  error_string += '\n';
-
-  std::string linenum = std::to_string (tok.line + 1);
-  error_string += linenum + get_line (tok.line);
-  error_string += '\n';
-
-  size_t start = tok.end - tok.len + linenum.length ();
-  for (size_t i = 0; i < start; i++)
-    {
-      error_string += ' ';
-    }
-  error_string += escape_color (ESCColor::ESCCOLOR_RED);
-  error_string += escape_graphics (ESCGraphics::ESCGRAPHICS_BOLD);
-  error_string += '^';
-
-  for (size_t i = 0; i < tok.len - 1; i++)
-    {
-      error_string += '~';
-    }
-  error_string += escape_reset ();
-
-  return error_string;
-}
-
-std::string
-Lexer::get_line (size_t linenum) const
-{
-  size_t pos = 0;
-  // Skip until found line by number
-  while (pos < _src.length () && linenum > 0)
-    {
-      if (_src.at (pos++) == '\n')
-        {
-          linenum--;
-        }
-    }
-
-  std::string buf{};
-  while (pos < _src.length ())
-    {
-      char c = _src.at (pos++);
-      if (c == '\n')
-        {
-          break;
-        }
-      buf += c;
-    }
-
-  return buf;
 }
 
 bool
