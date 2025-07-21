@@ -1,35 +1,31 @@
 #pragma once
 
-#include "lexer.hpp"
+#include <lexer.hpp>
 #include <string>
 #include <vector>
 
 namespace nlc
 {
 
-#define __NLC_CST_TYPE_DEFINE_(group, index)                                  \
+#define __CST_TYPE_DEFINE_(group, index)                                      \
   ((((group) & 0xFF) << 8) | ((index) & 0xFF))
-#define __NLC_CST_TYPE_GROUP_(type) (((type) >> 8) & 0xFF)
-#define __NLC_CST_TYPE_INDEX_(type) ((type) & 0xFF)
-
 enum CSTType : unsigned short
 {
-  CST_PROG = __NLC_CST_TYPE_DEFINE_ (0, 0),
-  CST_STMTLIST = __NLC_CST_TYPE_DEFINE_ (0, 1),
-  CST_MODULE = __NLC_CST_TYPE_DEFINE_ (0, 2),
+  CST_PROG = __CST_TYPE_DEFINE_ (0, 0),
+  CST_STMTLIST = __CST_TYPE_DEFINE_ (0, 1),
+  CST_IMPORT = __CST_TYPE_DEFINE_ (0, 2),
+  CST_MACRO = __CST_TYPE_DEFINE_ (0, 3),
+  CST_EXPR = __CST_TYPE_DEFINE_ (0, 4),
 
-  CST_STMT_RETURN = __NLC_CST_TYPE_DEFINE_ (1, 0),
-  CST_STMT_IF = __NLC_CST_TYPE_DEFINE_ (1, 1),
-  CST_STMT_ELSE = __NLC_CST_TYPE_DEFINE_ (1, 2),
-  CST_STMT_SWITCH = __NLC_CST_TYPE_DEFINE_ (1, 3),
-  CST_STMT_GOTO = __NLC_CST_TYPE_DEFINE_ (1, 4),
-  CST_STMT_BREAK = __NLC_CST_TYPE_DEFINE_ (1, 5),
-  CST_STMT_CONTINUE = __NLC_CST_TYPE_DEFINE_ (1, 6),
-  CST_STMT_FOR = __NLC_CST_TYPE_DEFINE_ (1, 7),
-  CST_STMT_WHILE = __NLC_CST_TYPE_DEFINE_ (1, 8),
-  CST_STMT_LABEL = __NLC_CST_TYPE_DEFINE_ (1, 9),
-  CST_STMT_IMPORT = __NLC_CST_TYPE_DEFINE_ (1, 10),
+  CST_DECL_VAR_DECL = __CST_TYPE_DEFINE_ (1, 0),
+
+  CST_STMT_RETURN = __CST_TYPE_DEFINE_ (2, 0),
+
+  CST_MODULE_NAME = __CST_TYPE_DEFINE_ (3, 0),
+  CST_MODULE_ITEM = __CST_TYPE_DEFINE_ (3, 1),
+  CST_MODULE_EVERYTHING = __CST_TYPE_DEFINE_ (3, 2),
 };
+#undef __CST_TYPE_DEFINE_
 
 struct CST
 {
@@ -71,6 +67,9 @@ public:
     {
     }
   };
+  struct ParserWarn : ParserError
+  {
+  };
 
   Parser (const std::vector<Token> &tokens) : _tokens (tokens) {}
 
@@ -81,37 +80,20 @@ public:
 private:
   std::vector<ParserError> _errors{};
   std::vector<Token> _tokens;
-  size_t _errored = false;
+  bool _errored = false;
   size_t _pos{};
 
-  void skip_until (TokenType type);
-
-  // <stmt>
-  //   : { <stmtlist> }
-  //   | <idcreatestmt>
-  //   | return <expr>;
-  //   | if (<expr>) <stmt>
-  //   | else <stmt>
-  //   | switch (<expr>) { <casestmtlist> }
-  //   | goto @<id>;
-  //   | break;
-  //   | continue;
-  //   | for (<stmt>; <expr>; <expr>) <stmt>
-  //   | while (<expr>) <stmt>
-  //   | @<label>:
-  //   | import <module>;
+  // <entry>
+  //   : <decl>
+  //   | <macro>
+  //   | <import>
   //   ;
-  CST parse_statement ();
-  CST parse_return_statement ();   // return <expr>;
-  CST parse_if_statement ();       // if (<expr>) <stmt>
-  CST parse_else_statement ();     // else <stmt>
-  CST parse_goto_statement ();     // goto @<id>;
-  CST parse_break_statement ();    // break;
-  CST parse_continue_statement (); // continue;
-  CST parse_for_statement ();      // for (<stmt>; <expr>; <expr>) <stmt>
-  CST parse_while_statement ();    // while (<expr>) <stmt>
-  CST parse_label_statement ();    // @<label>:
-  CST parse_import_statement ();   // import <module>;
+  CST parse_entry ();
+
+  // <import>
+  //   : import <module>;
+  //   ;
+  CST parse_import ();
 
   // <module>
   //   : <id>.<module>
@@ -119,10 +101,36 @@ private:
   //   ;
   CST parse_module ();
 
-  void add_error (const ParserError &err);
+  void skip_until (TokenType type);
+
+  template <typename... Args>
+  void
+  add_error (Args &&...args)
+  {
+    _errors.emplace_back (args...);
+    _errored = true;
+  }
 
   bool verify_pos (size_t pos);
   bool verify_tokentype (size_t pos, TokenType got, TokenType expected);
+
+  TokenType peek (size_t pos);
+
+#define __VERIFY_POS(pos)                                                     \
+  {                                                                           \
+    if (!verify_pos ((pos)))                                                  \
+      {                                                                       \
+        return {};                                                            \
+      }                                                                       \
+  }
+
+#define __VERIFY_TOKENTYPE(pos, got, expected)                                \
+  {                                                                           \
+    if (!verify_tokentype ((pos), (got), (expected)))                         \
+      {                                                                       \
+        return {};                                                            \
+      }                                                                       \
+  }
 };
 
 }

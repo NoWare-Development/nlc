@@ -1,5 +1,8 @@
 #include "parser.hpp"
 
+#define __CST_TYPE_GROUP_(type) (((type) >> 8) & 0xFF)
+#define __CST_TYPE_INDEX_(type) ((type) & 0xFF)
+
 namespace nlc
 {
 
@@ -62,7 +65,9 @@ csttype_to_string (CSTType type)
 {
   constexpr const char *prefixes[0x100] = {
     "",
+    "DECL_",
     "STMT_",
+    "MODULE_",
   };
 
   constexpr const char *groups[0x100][0x100] = {
@@ -70,27 +75,29 @@ csttype_to_string (CSTType type)
         // Groupless
         "PROG",
         "STMTLIST",
-        "MODULE",
+        "IMPORT",
+        "MACRO",
+        "EXPR",
+    },
+    {
+        // DECL
+        "VAR_DECL",
     },
     {
         // STMT
         "RETURN",
-        "IF",
-        "ELSE",
-        "SWITCH",
-        "GOTO",
-        "BREAK",
-        "CONTINUE",
-        "FOR",
-        "WHILE",
-        "LABEL",
-        "IMPORT",
+    },
+    {
+        // MODULE
+        "NAME",
+        "ITEM",
+        "EVERYTHING",
     },
   };
 
   std::string out{};
-  out += prefixes[__NLC_CST_TYPE_GROUP_ (type)];
-  out += groups[__NLC_CST_TYPE_GROUP_ (type)][__NLC_CST_TYPE_INDEX_ (type)];
+  out += prefixes[__CST_TYPE_GROUP_ (type)];
+  out += groups[__CST_TYPE_GROUP_ (type)][__CST_TYPE_INDEX_ (type)];
   return out;
 }
 

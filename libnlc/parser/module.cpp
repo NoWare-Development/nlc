@@ -1,4 +1,5 @@
 #include "parser.hpp"
+#include <iostream>
 
 namespace nlc
 {
@@ -6,32 +7,37 @@ namespace nlc
 CST
 Parser::parse_module ()
 {
-  CST module (CSTType::CST_MODULE);
-
   auto cur = _tokens.at (_pos);
-  if (!verify_tokentype (_pos, cur.type, TokenType::TOKEN_ID))
+
+  switch (cur.type)
     {
-      return {};
+    case TokenType::TOKEN_MUL:
+      _pos++;
+      return CST (CSTType::CST_MODULE_EVERYTHING);
+
+    case TokenType::TOKEN_ID:
+      {
+        auto next = peek (_pos + 1);
+        if (next == TokenType::TOKEN_DCOLON)
+          {
+            _pos += 2;
+            __VERIFY_POS (_pos);
+            CST module (CSTType::CST_MODULE_NAME, cur.value);
+            module.append (parse_module ());
+            return module;
+          }
+
+        _pos++;
+        return CST (CSTType::CST_MODULE_ITEM, cur.value);
+      }
+
+    default:
+      break;
     }
-  module.value = cur.value;
+
+  add_error (_pos, ParserErrorType::PARSER_ERROR_UNEXPECTED);
   _pos++;
-
-  if (_pos < _tokens.size ())
-    {
-      auto next1 = _tokens.at (_pos);
-      if (next1.type == TokenType::TOKEN_PERIOD)
-        {
-          _pos++;
-          if (!verify_pos (_pos))
-            {
-              return {};
-            }
-          auto submodule = parse_module ();
-          module.append (submodule);
-        }
-    }
-
-  return module;
+  return {};
 }
 
 }

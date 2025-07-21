@@ -4,8 +4,6 @@
 #include <iostream>
 #include <string>
 
-constexpr const char *error_or_errors[2] = { "error", "errors" };
-
 void
 ErrorHandler::add_tokens (const std::vector<nlc::Token> &tokens)
 {

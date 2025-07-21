@@ -9,13 +9,13 @@ Parser::parse ()
   CST prog (CSTType::CST_PROG);
   while (_pos < _tokens.size ())
     {
-      auto statement = parse_statement ();
+      auto entry = parse_entry ();
       if (_errored)
         {
           _errored = false;
           continue;
         }
-      prog.append (statement);
+      prog.append (entry);
     }
   return prog;
 }
@@ -40,20 +40,12 @@ Parser::skip_until (TokenType type)
     }
 }
 
-void
-Parser::add_error (const Parser::ParserError &err)
-{
-  _errors.push_back (err);
-  _errored = true;
-}
-
 bool
 Parser::verify_pos (size_t pos)
 {
   if (pos >= _tokens.size ())
     {
-      add_error (Parser::ParserError (
-          pos, Parser::ParserErrorType::PARSER_ERROR_EXPECTED));
+      add_error (pos++, Parser::ParserErrorType::PARSER_ERROR_EXPECTED);
       return false;
     }
   return true;
@@ -64,11 +56,19 @@ Parser::verify_tokentype (size_t pos, TokenType got, TokenType expected)
 {
   if (got != expected)
     {
-      add_error (Parser::ParserError (
-          pos, Parser::ParserErrorType::PARSER_ERROR_UNEXPECTED));
+      add_error (pos++, Parser::ParserErrorType::PARSER_ERROR_UNEXPECTED);
       return false;
     }
   return true;
+}
+
+TokenType
+Parser::peek (size_t pos)
+{
+  if (pos >= _tokens.size ())
+    return TokenType::TOKEN_ERR;
+
+  return _tokens.at (pos).type;
 }
 
 }
