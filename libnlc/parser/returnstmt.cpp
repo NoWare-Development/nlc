@@ -1,0 +1,32 @@
+#include "lexer.hpp"
+#include "libnlc/parser/macros.hpp"
+#include "parser.hpp"
+
+namespace nlc
+{
+
+AST
+Parser::parse_return_statement ()
+{
+  AST return_statement (ASTType::AST_STMT_RETURN);
+  _pos++;
+  VERIFY_POS (_pos);
+
+  auto cur = _tokens.at (_pos);
+  if (cur.type == TokenType::TOKEN_SEMI)
+    {
+      _pos++;
+      return return_statement;
+    }
+
+  auto expr = parse_expression ();
+  return_statement.append (expr);
+  VERIFY_POS (_pos);
+  cur = _tokens.at (_pos);
+  VERIFY_TOKEN (_pos, cur.type, TokenType::TOKEN_SEMI);
+  _pos++;
+
+  return return_statement;
+}
+
+}

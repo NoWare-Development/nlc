@@ -5,21 +5,18 @@ namespace nlc
 {
 
 AST
-Parser::parse_import ()
+Parser::parse_goto_statement ()
 {
-  AST import (ASTType::AST_IMPORT);
-
+  AST goto_statement (ASTType::AST_STMT_GOTO);
   _pos++;
   VERIFY_POS (_pos);
-  auto module = parse_module ();
-  import.append (module);
-
+  auto label = parse_label ();
+  goto_statement.append (label);
   VERIFY_POS (_pos);
   auto cur = _tokens.at (_pos);
   VERIFY_TOKEN (_pos, cur.type, TokenType::TOKEN_SEMI);
   _pos++;
-
-  return import;
+  return goto_statement;
 }
 
 }

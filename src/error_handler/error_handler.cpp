@@ -1,8 +1,26 @@
 #include "error_handler.hpp"
 #include "../util/util.hpp"
 #include "lexer.hpp"
+#include "parser.hpp"
 #include <iostream>
 #include <string>
+
+ErrorHandler::ErrorHandler (const std::string &filename,
+                            const std::string &src)
+{
+  _filename = filename;
+  _src = src;
+
+  for (auto &c : _src)
+    {
+      if (c == '\n')
+        {
+          _nol++;
+        }
+    }
+
+  _numoffset = get_number_length (_nol);
+}
 
 void
 ErrorHandler::add_tokens (const std::vector<nlc::Token> &tokens)
@@ -78,14 +96,18 @@ std::string
 ErrorHandler::get_token_error (const nlc::Token &tok) const
 {
   std::string error_string{};
-  error_string += "Failed to process token \"";
-  error_string += tok.value;
-  error_string += "\" in file \"" + _filename + "\" ";
-  error_string += "at (" + std::to_string (tok.line + 1) + ":"
-                  + std::to_string (tok.end - (tok.len - 1)) + ")";
-  error_string += '\n';
 
-  error_string += get_highlighted_token (tok, ESCColor::ESCCOLOR_RED);
+  error_string += get_message_start (tok.line + 1, tok.end - tok.len + 1,
+                                     "error", ESCColor::ESCCOLOR_RED,
+                                     ESCGraphics::ESCGRAPHICS_BOLD);
+  error_string += "Unidentified token '";
+  error_string += escape_graphics (ESCGraphics::ESCGRAPHICS_BOLD);
+  error_string += tok.value;
+  error_string += escape_reset ();
+  error_string += "'\n";
+
+  error_string += get_highlighted_token (tok, ESCColor::ESCCOLOR_RED,
+                                         ESCGraphics::ESCGRAPHICS_BOLD);
 
   return error_string;
 }
@@ -93,45 +115,97 @@ ErrorHandler::get_token_error (const nlc::Token &tok) const
 std::string
 ErrorHandler::get_parser_error (const nlc::Parser::ParserError &err) const
 {
+  const std::string error_reason = get_parser_error_reason (err);
   std::string error_string{};
 
-  auto &tok = _tokens.at (err.pos);
-  error_string += "Failed to parse: " + get_parser_error_reason (err)
-                  + " in file \"" + _filename + "\" at ("
-                  + std::to_string (tok.line + 1) + ":"
-                  + std::to_string (tok.end - (tok.len - 1)) + ")";
-  error_string += '\n';
+  error_string += get_message_start (_nol, last_line ().length (), "error",
+                                     ESCColor::ESCCOLOR_RED,
+                                     ESCGraphics::ESCGRAPHICS_BOLD);
+  error_string += error_reason;
 
-  error_string += get_highlighted_token (tok, ESCColor::ESCCOLOR_RED);
+  if (err.type == nlc::Parser::ParserError::ErrType::PARSER_ERROR_UNEXPECTED)
+    {
+      error_string += '\n';
+      error_string += get_highlighted_token (_tokens.at (err.pos),
+                                             ESCColor::ESCCOLOR_RED,
+                                             ESCGraphics::ESCGRAPHICS_BOLD);
+    }
 
   return error_string;
 }
 
 std::string
-ErrorHandler::get_highlighted_token (const nlc::Token &tok,
-                                     ESCColor color) const
+ErrorHandler::get_message_start (size_t line, size_t start,
+                                 const std::string &msg, ESCColor color,
+                                 ESCGraphics mode) const
 {
   std::string out{};
 
-  std::string linenum = std::to_string (tok.line + 1) + ": ";
-  std::string line = get_line (tok.line);
+  out += escape_graphics (ESCGraphics::ESCGRAPHICS_BOLD);
+  out += _filename;
+  out += ":" + std::to_string (line) + ":" + std::to_string (start);
+  out += ": ";
 
-  out += linenum + line + '\n';
+  out += escape_graphics (mode);
+  out += escape_color (color);
+  out += msg + ": ";
+  out += escape_reset ();
 
-  size_t start = tok.end - tok.len + linenum.length () + 1;
-  for (size_t i = 0; i < start; i++)
+  return out;
+}
+
+std::string
+ErrorHandler::get_highlighted_token (const nlc::Token &tok, ESCColor color,
+                                     ESCGraphics mode) const
+{
+  constexpr const size_t base_offset = 2;
+  constexpr const char *separator = " | ";
+
+  std::string out{};
+
+  const size_t line_num = tok.line + 1;
+  const size_t line_num_len = get_number_length (line_num);
+
+  size_t line_num_offset = _numoffset - line_num_len + base_offset;
+  for (; line_num_offset > 0; line_num_offset--)
     {
       out += ' ';
     }
-  out += escape_color (color);
-  out += escape_graphics (ESCGraphics::ESCGRAPHICS_BOLD);
-  out += '^';
 
+  out += std::to_string (line_num);
+  out += separator;
+
+  auto line = get_line (tok.line);
+  line.insert (tok.end + 1, escape_reset ());
+  line.insert (tok.end - tok.len + 1, escape_color (color));
+  line.insert (tok.end - tok.len + 1, escape_graphics (mode));
+
+  out += line;
+  out += '\n';
+
+  for (size_t i = 0; i < _numoffset + 2; i++)
+    {
+      out += ' ';
+    }
+  out += separator;
+
+  const size_t mark_offset = tok.end - tok.len + 1;
+  for (size_t i = 0; i < mark_offset; i++)
+    {
+      out += ' ';
+    }
+
+  out += escape_graphics (mode);
+  out += escape_color (color);
+
+  out += '^';
   for (size_t i = 0; i < tok.len - 1; i++)
     {
       out += '~';
     }
+
   out += escape_reset ();
+
   return out;
 }
 
@@ -143,20 +217,28 @@ ErrorHandler::get_parser_error_reason (
 
   switch (err.type)
     {
-    case Parser::ParserErrorType::PARSER_ERROR_UNK:
+    case Parser::ParserError::ErrType::PARSER_ERROR_UNK:
       return "<Unknown error>";
 
-    case Parser::ParserErrorType::PARSER_ERROR_EXPECTED:
+    case Parser::ParserError::ErrType::PARSER_ERROR_EXPECTED:
       {
         std::string out{};
-        out += "Expected token \"" + err.msg + "\"";
+        out += "Expected token";
         return out;
       }
 
-    case Parser::ParserErrorType::PARSER_ERROR_UNEXPECTED:
+    case Parser::ParserError::ErrType::PARSER_ERROR_UNEXPECTED:
       {
         std::string out{};
-        out += "Unexpected token \"" + err.msg + "\"";
+        out += "Unexpected token \"" + _tokens.at (err.pos).value + "\"";
+        return out;
+      }
+
+    case Parser::ParserError::ErrType::PARSER_ERROR_INVALID_EXPR:
+      {
+        std::string out{};
+        out += "Invalid expression at line "
+               + std::to_string (_tokens.at (err.pos).line);
         return out;
       }
 
@@ -208,4 +290,40 @@ ErrorHandler::get_line (size_t linenum) const
       buf += c;
     }
   return buf;
+}
+
+std::string
+ErrorHandler::last_line () const
+{
+  return get_line (_nol - 1);
+}
+
+size_t
+ErrorHandler::get_number_length (long long num) const
+{
+  size_t len = 0;
+  if (num == 0)
+    {
+      return 1;
+    }
+  else if (num < 0)
+    {
+      len++;
+      num *= -1;
+    }
+
+  while (num > 0)
+    {
+      num /= 10;
+      len++;
+    }
+
+  return len;
+}
+
+bool
+ErrorHandler::is_parser_error_displayable (
+    nlc::Parser::ParserError::ErrType type) const
+{
+  return false;
 }
