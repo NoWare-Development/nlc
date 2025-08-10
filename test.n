@@ -1,0 +1,27 @@
+import std.io;
+
+struct MyStruct {
+  var: int;
+}
+
+@label:
+
+main :: (argc: int, argc: **char) -> int {
+  println("Hello, World!");
+  return -0x30;
+
+  c: char = '';
+  c >>= 5;
+
+  if (test) return 0x20;
+  else return 0x30;
+
+  goto @label;
+
+  break;
+  continue;
+
+  for () return 30;
+
+  while () return 20;
+}
