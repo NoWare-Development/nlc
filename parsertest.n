@@ -1,1 +1,67 @@
-import std::io::*;
+import std::io; // Import
+
+enum TestEnum1 { // Enum definition
+  TEST_ENUM1_ELEM_1,
+  TEST_ENUM1_ELEM_2,
+  TEST_ENUM1_ELEM_3,
+  TEST_ENUM1_ELEM_4,
+}
+
+export enum TestEnum2 { // Exported enum definition
+  TEST_ENUM2_ELEM_1,
+  TEST_ENUM2_ELEM_2,
+  TEST_ENUM2_ELEM_3,
+  TEST_ENUM2_ELEM_4
+}
+
+typedef *sometype[][][] newtype; // Type definition
+
+id1: int;                // Variable declaration
+id2: int = 4;            // Variable definition
+const id_const: int = 5; // Constant variable definition
+
+// Function definition
+main :: (argc: int = 4*5, argv: char[][]) -> int {
+  return 69; // Return statement
+
+  goto @label; // Goto statement
+
+  @label: // Label statement
+
+  break;    // Break statement
+  continue; // Continue statement
+
+  { // Statement list
+    return 99;
+  }
+
+  while (false) continue;
+  while (5 == 4 + 1 * 4 << 1) {
+    break;
+  }
+
+  for (; 1 < 2; id = 4) break;
+
+  do { } while (0);
+
+  variable: float = 0.53f;
+
+  nestedfunc :: (argument: int) -> int {
+    return argument * 2;
+  }
+
+  for (i: size_t = 0; i < argc; i += 1) {
+    variable: int = nestedfunc(argc + i);
+  }
+
+  call_to_func(123 + 4, id / 2.25f);
+
+  switch (id + 5) {
+    case 1 + 2: return 0;
+
+    default: {
+      id += 14;
+      break;
+    }
+  }
+}
