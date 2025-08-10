@@ -273,6 +273,11 @@ Lexer::tokenize (const std::string &src)
             out.push_back (gen_token (1, _pos, TokenType::TOKEN_BOR, "|"));
             break;
           }
+        case '~':
+          {
+            out.push_back (gen_token (1, _pos, TokenType::TOKEN_BNOT, "~"));
+            break;
+          }
         case '^':
           {
             char n1 = peek (_pos + 1);
@@ -413,8 +418,11 @@ Lexer::process_num ()
         {
           return process_numoct ();
         }
-      _pos++;
-      return gen_token (1, _pos - 1, TokenType::TOKEN_NUM, "0");
+      else if (c2 != '.')
+        {
+          _pos++;
+          return gen_token (1, _pos - 1, TokenType::TOKEN_NUM, "0");
+        }
     }
 
   std::string buf{};
@@ -690,7 +698,7 @@ Lexer::is_processable (char c) const
          || c == '&' || c == '|' || c == '(' || c == ')' || c == '['
          || c == ']' || c == '{' || c == '}' || c == '"' || c == '\''
          || c == '<' || c == '>' || c == '=' || c == '%' || c == '@'
-         || c == ':' || c == ';' || c == '#' || c == ',';
+         || c == ':' || c == ';' || c == '#' || c == ',' || c == '~';
 }
 
 }
