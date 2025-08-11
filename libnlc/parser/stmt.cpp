@@ -112,7 +112,6 @@ Parser::parse_statement ()
       break;
     }
 
-  std::cout << "EXPRESSION STATEMENT POS: " << _pos << '\n';
   return parse_expression_statement ();
 }
 
