@@ -75,6 +75,7 @@ asttype_to_string (ASTType type)
     "EXPR_ASSIGN_OPERATOR",
     "EXPR_PREFIX_OPERATOR",
     "EXPR_OPERAND",
+    "TEMPLATE",
   };
 
   constexpr const char *ids[0x100][0x100] = {
@@ -92,6 +93,7 @@ asttype_to_string (ASTType type)
         "NONE",
         "LABEL",
         "VARIADIC",
+        "TEMPLATE",
     },
     {
         // STMT
@@ -187,6 +189,11 @@ asttype_to_string (ASTType type)
         "NUMTYPESPEC",
         "STRING",
         "SYMBOL",
+    },
+    {
+        // TEMPLATE
+        "TYPE_LIST",
+        "TYPE",
     },
   };
 

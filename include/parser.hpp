@@ -53,6 +53,7 @@ private:
   //   | <typedef>
   //   | <structdef>
   //   | <enumdef>
+  //   | <template>
   //   !export
   //   :
   //   | <import>
@@ -214,6 +215,16 @@ private:
   //   : defer <stmt>
   //   ;
   AST parse_defer_statement ();
+
+  // <template>
+  //   : template <ids> <templated>
+  //   ;
+  // <templated>
+  //   : <structdef>
+  //   | <funcdecl>
+  //   | <funcdef>
+  //   ;
+  AST parse_template ();
 
   AST parse_break_statement ();    // break;
   AST parse_continue_statement (); // continue;

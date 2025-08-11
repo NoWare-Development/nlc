@@ -1,7 +1,7 @@
 import std::io; // Import
 
 enum TestEnum1 { // Enum definition
-  TEST_ENUM1_ELEM_1,
+  TEST_ENUM1_ELEM_1 = !1,
   TEST_ENUM1_ELEM_2,
   TEST_ENUM1_ELEM_3,
   TEST_ENUM1_ELEM_4,
@@ -19,6 +19,11 @@ typedef *sometype[][][] newtype; // Type definition
 id1: int;                // Variable declaration
 id2: int = 4;            // Variable definition
 const id_const: int = 5; // Constant variable definition
+
+template <T>
+generic_test :: () -> T {
+  return 0;
+}
 
 // Function definition
 main :: (argc: int = 4*5, argv: char[][]) -> int {

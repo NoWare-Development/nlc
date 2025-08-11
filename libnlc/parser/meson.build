@@ -22,6 +22,7 @@ libnlc_src += [
   'libnlc/parser/returnstmt.cpp',
   'libnlc/parser/stmt.cpp',
   'libnlc/parser/switchstmt.cpp',
+  'libnlc/parser/template.cpp',
   'libnlc/parser/top.cpp',
   'libnlc/parser/type.cpp',
   'libnlc/parser/typedef.cpp',

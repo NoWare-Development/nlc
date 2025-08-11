@@ -27,6 +27,10 @@ Parser::parse_top (bool for_export)
           {
             return parse_typedef ();
           }
+        else if (cur.value == "template")
+          {
+            return parse_template ();
+          }
         else if (!for_export)
           {
             if (cur.value == "import")
