@@ -27,6 +27,10 @@ Parser::parse_top (bool for_export)
           {
             return parse_typedef ();
           }
+        else if (cur.value == "struct")
+          {
+            return parse_struct ();
+          }
         else if (cur.value == "template")
           {
             return parse_template ();

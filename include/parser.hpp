@@ -151,6 +151,8 @@ private:
   //   | <dowhilestmt>
   //   | <switchstmt>
   //   | <deferstmt>
+  //   | <structdef>
+  //   | <template>
   //   | break;
   //   | continue;
   //   ;
@@ -215,6 +217,11 @@ private:
   //   : defer <stmt>
   //   ;
   AST parse_defer_statement ();
+
+  // <structdef>
+  //   : struct <id> { <decldefs> }
+  //   ;
+  AST parse_struct();
 
   // <template>
   //   : template <ids> <templated>

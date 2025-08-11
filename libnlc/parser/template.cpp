@@ -46,7 +46,8 @@ Parser::parse_template ()
   VERIFY_TOKEN (_pos, cur.type, TokenType::TOKEN_ID);
   if (cur.value == "struct")
     {
-      // TODO: implement structs
+      auto structure = parse_struct ();
+      template_.append (structure);
       return template_;
     }
 

@@ -20,6 +20,15 @@ id1: int;                // Variable declaration
 id2: int = 4;            // Variable definition
 const id_const: int = 5; // Constant variable definition
 
+struct MyStruct {
+  a: int;
+}
+
+template <T>
+struct GenericStruct {
+  data: *T;
+}
+
 template <T>
 generic_test :: () -> T {
   return 0;

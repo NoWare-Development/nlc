@@ -94,6 +94,7 @@ asttype_to_string (ASTType type)
         "LABEL",
         "VARIADIC",
         "TEMPLATE",
+        "STRUCT",
     },
     {
         // STMT

@@ -49,7 +49,11 @@ Parser::parse_statement ()
 
     case TokenType::TOKEN_ID:
       {
-        if (cur.value == "return")
+        if (cur.value == "struct")
+          {
+            return parse_struct ();
+          }
+        else if (cur.value == "return")
           {
             return parse_return_statement ();
           }
@@ -84,6 +88,10 @@ Parser::parse_statement ()
         else if (cur.value == "defer")
           {
             return parse_defer_statement ();
+          }
+        else if (cur.value == "template")
+          {
+            return parse_template ();
           }
         else if (is_modifier (cur.value))
           {
