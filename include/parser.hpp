@@ -1,8 +1,8 @@
 #pragma once
 
-#include "lexer.hpp"
 #include <ast.hpp>
 #include <cstdint>
+#include <lexer.hpp>
 #include <map>
 #include <vector>
 
