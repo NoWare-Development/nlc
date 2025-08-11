@@ -149,6 +149,7 @@ private:
   //   | <forstmt>
   //   | <dowhilestmt>
   //   | <switchstmt>
+  //   | <deferstmt>
   //   | break;
   //   | continue;
   //   ;
@@ -209,10 +210,13 @@ private:
   //   ;
   AST parse_case_statement ();
 
+  // <deferstmt>
+  //   : defer <stmt>
+  //   ;
+  AST parse_defer_statement ();
+
   AST parse_break_statement ();    // break;
   AST parse_continue_statement (); // continue;
-
-  AST parse_call (); // id (<exprlist>)
 
   // <expr>
   // NOTE: `toplevel` is passed only in expression statements.
@@ -220,6 +224,7 @@ private:
   AST parse_expression (bool toplevel = false);
   AST parse_expression_tree (bool toplevel = false);
   AST parse_expression_operand ();
+  AST parse_call_operand ();
   AST pratt_parse_expression (const std::vector<AST> &in, size_t *pos,
                               int min_bp) const;
   bool validate_expression (const AST &expr_ast) const;

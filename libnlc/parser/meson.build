@@ -5,6 +5,7 @@ libnlc_src += [
   'libnlc/parser/call.cpp',
   'libnlc/parser/casestmt.cpp',
   'libnlc/parser/decldef.cpp',
+  'libnlc/parser/deferstmt.cpp',
   'libnlc/parser/enum.cpp',
   'libnlc/parser/export.cpp',
   'libnlc/parser/expr.cpp',

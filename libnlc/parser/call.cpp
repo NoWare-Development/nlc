@@ -5,7 +5,7 @@ namespace nlc
 {
 
 AST
-Parser::parse_call ()
+Parser::parse_call_operand ()
 {
   VERIFY_POS (_pos);
   auto cur = _tokens.at (_pos);

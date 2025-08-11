@@ -81,6 +81,10 @@ Parser::parse_statement ()
           {
             return parse_switch_statement ();
           }
+        else if (cur.value == "defer")
+          {
+            return parse_defer_statement ();
+          }
         else if (is_modifier (cur.value))
           {
             return parse_identifier_statement ();

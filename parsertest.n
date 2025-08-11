@@ -64,4 +64,6 @@ main :: (argc: int = 4*5, argv: char[][]) -> int {
       break;
     }
   }
+
+  defer { println("TESTLINE", 123llu, 4.0f); }
 }

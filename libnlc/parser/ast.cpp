@@ -108,6 +108,7 @@ asttype_to_string (ASTType type)
         "SWITCH",
         "CASE",
         "DEFAULT",
+        "DEFER",
     },
     {
         // ENUM
@@ -184,6 +185,8 @@ asttype_to_string (ASTType type)
         "CAST_TO",
         "CALL",
         "NUMTYPESPEC",
+        "STRING",
+        "SYMBOL",
     },
   };
 

@@ -99,7 +99,8 @@ Parser::parse_expression_tree (bool toplevel)
           if (cur == TokenType::TOKEN_MUL       // Dereference
               || cur == TokenType::TOKEN_ID     // Identifier
               || cur == TokenType::TOKEN_LPAREN // Nested expression
-              || is_numeric_token (cur))
+              || cur == TokenType::TOKEN_STRING
+              || cur == TokenType::TOKEN_SYMBOL || is_numeric_token (cur))
             {
               auto operand = parse_expression_operand ();
               expr_tree.append (operand);
@@ -171,9 +172,7 @@ Parser::parse_expression_operand ()
         auto next = peek (_pos + 1);
         if (next == TokenType::TOKEN_LPAREN)
           {
-            AST call_operand (ASTType::AST_EXPR_OPERAND_CALL);
-            auto call = parse_call ();
-            call_operand.append (call);
+            auto call_operand = parse_call_operand ();
             return call_operand;
           }
 
@@ -199,7 +198,7 @@ Parser::parse_expression_operand ()
                 _pos++;
               }
           }
-        break;
+        return out_operand;
       }
 
     case TokenType::TOKEN_NUMFLOAT:
@@ -216,7 +215,21 @@ Parser::parse_expression_operand ()
                 _pos++;
               }
           }
-        break;
+        return out_operand;
+      }
+
+    case TokenType::TOKEN_STRING:
+      {
+        out_operand = AST (ASTType::AST_EXPR_OPERAND_STRING, cur.value);
+        _pos++;
+        return out_operand;
+      }
+
+    case TokenType::TOKEN_SYMBOL:
+      {
+        out_operand = AST (ASTType::AST_EXPR_OPERAND_SYMBOL, cur.value);
+        _pos++;
+        return out_operand;
       }
 
     default:
