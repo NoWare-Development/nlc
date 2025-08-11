@@ -81,3 +81,23 @@ main :: (argc: int = 4*5, argv: char[][]) -> int {
 
   defer { println("TESTLINE", 123llu, 4.0f); }
 }
+
+testfunc :: () -> void {
+  struct StructInFunc {
+    val: int;
+
+    setValue :: (value: int) -> void {
+      val = value;
+    }
+  }
+
+  template <T>
+  struct GenericStructInFunc {
+    data: *T;
+
+    createData :: (value: T) -> void {
+      data = alloc(sizeof(T));
+      *data = value;
+    }
+  }
+}
