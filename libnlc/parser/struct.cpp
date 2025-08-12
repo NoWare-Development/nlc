@@ -7,9 +7,8 @@ namespace nlc
 AST
 Parser::parse_struct ()
 {
-  AST structure (ASTType::AST_STRUCT);
+  AST structure (_pos++, ASTType::AST_STRUCT);
 
-  _pos++;
   VERIFY_POS (_pos);
   auto cur = _tokens.at (_pos);
   VERIFY_TOKEN (_pos, cur.type, TokenType::TOKEN_ID);

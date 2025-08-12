@@ -12,6 +12,7 @@ Parser::parse_case_statement ()
 
   AST out;
 
+  size_t start_pos = _pos;
   if (cur.value == "default")
     {
       _pos++;
@@ -20,11 +21,11 @@ Parser::parse_case_statement ()
       cur = _tokens.at (_pos);
       VERIFY_TOKEN (_pos, cur.type, TokenType::TOKEN_COLON);
       _pos++;
-      out = AST (ASTType::AST_STMT_DEFAULT);
+      out = AST (start_pos, ASTType::AST_STMT_DEFAULT);
     }
   else if (cur.value == "case")
     {
-      out = AST (ASTType::AST_STMT_CASE);
+      out = AST (start_pos, ASTType::AST_STMT_CASE);
       _pos++;
 
       VERIFY_POS (_pos);

@@ -2,6 +2,7 @@
 #include "libnlc/parser/macros.hpp"
 #include "parser.hpp"
 #include <iostream>
+#include <string>
 #include <vector>
 
 namespace nlc
@@ -10,7 +11,7 @@ namespace nlc
 AST
 Parser::parse_expression_statement ()
 {
-  AST expr_stmt (ASTType::AST_STMT_EXPR);
+  AST expr_stmt (_pos, ASTType::AST_STMT_EXPR);
   auto expr = parse_expression (true);
   expr_stmt.append (expr);
   VERIFY_POS (_pos);
@@ -26,18 +27,19 @@ Parser::parse_expression (bool toplevel)
   VERIFY_POS (_pos);
   size_t start = _pos;
   auto expr_tree = parse_expression_tree (toplevel);
-  size_t end = _pos;
   if (expr_tree.is_empty ())
     {
       add_error (ParserError::ErrType::PARSER_ERROR_UNEXPECTED, _pos);
       return {};
     }
 
-  if (!validate_expression (expr_tree))
+  size_t invalid_pos;
+  std::string error_reason{};
+  if (!validate_expression (expr_tree, invalid_pos, error_reason))
     {
-      add_error (ParserError::ErrType::PARSER_ERROR_INVALID_EXPR, _pos,
-                 end - start);
-      return {};
+      AST out (start, ASTType::AST_EXPR);
+      out.append (AST (invalid_pos, ASTType::AST_ERR, error_reason));
+      return out;
     }
 
   return pratt_parse_expression (expr_tree.children, nullptr, 0);
@@ -46,7 +48,7 @@ Parser::parse_expression (bool toplevel)
 AST
 Parser::parse_expression_tree (bool toplevel)
 {
-  AST expr_tree (ASTType::AST_EXPR);
+  AST expr_tree (_pos, ASTType::AST_EXPR);
 
   TokenType prev{ TokenType::TOKEN_ERR };
   while (_pos < _tokens.size ())
@@ -57,9 +59,8 @@ Parser::parse_expression_tree (bool toplevel)
       if ((prev == TokenType::TOKEN_ERR || is_operator (prev))
           && is_prefix_operator (cur))
         {
-          expr_tree.append (AST (_prefix_operators.at (cur)));
+          expr_tree.append (AST (_pos++, _prefix_operators.at (cur)));
           prev = cur;
-          _pos++;
           continue;
         }
 
@@ -69,27 +70,24 @@ Parser::parse_expression_tree (bool toplevel)
           // Binary operators
           if (is_binary_operator (cur))
             {
-              expr_tree.append (AST (_binary_operators.at (cur)));
+              expr_tree.append (AST (_pos++, _binary_operators.at (cur)));
               prev = cur;
-              _pos++;
               continue;
             }
 
           // Compare operators
           else if (is_compare_operator (cur))
             {
-              expr_tree.append (AST (_compare_operators.at (cur)));
+              expr_tree.append (AST (_pos++, _compare_operators.at (cur)));
               prev = cur;
-              _pos++;
               continue;
             }
 
           // Assignment operators
           else if (is_assign_operator (cur) && toplevel)
             {
-              expr_tree.append (AST (_assign_operators.at (cur)));
+              expr_tree.append (AST (_pos++, _assign_operators.at (cur)));
               prev = cur;
-              _pos++;
               continue;
             }
         }
@@ -145,9 +143,8 @@ Parser::parse_expression_operand ()
       {
         if (cur.value == "cast")
           {
-            AST cast (ASTType::AST_EXPR_OPERAND_CAST_TO);
+            AST cast (_pos++, ASTType::AST_EXPR_OPERAND_CAST_TO);
 
-            _pos++;
             VERIFY_POS (_pos);
             auto cast_token = peek (_pos);
             VERIFY_TOKEN (_pos, cast_token, TokenType::TOKEN_LPAREN);
@@ -176,8 +173,8 @@ Parser::parse_expression_operand ()
             return call_operand;
           }
 
-        out_operand = AST (ASTType::AST_EXPR_OPERAND_IDENTIFIER, cur.value);
-        _pos++;
+        out_operand
+            = AST (_pos++, ASTType::AST_EXPR_OPERAND_IDENTIFIER, cur.value);
         break;
       }
 
@@ -193,9 +190,8 @@ Parser::parse_expression_operand ()
             cur = _tokens.at (_pos);
             if (cur.type == TokenType::TOKEN_ID)
               {
-                out_operand.append (
-                    AST (ASTType::AST_EXPR_OPERAND_NUMTYPESPEC, cur.value));
-                _pos++;
+                out_operand.append (AST (
+                    _pos++, ASTType::AST_EXPR_OPERAND_NUMTYPESPEC, cur.value));
               }
           }
         return out_operand;
@@ -203,16 +199,15 @@ Parser::parse_expression_operand ()
 
     case TokenType::TOKEN_NUMFLOAT:
       {
-        out_operand = AST (ASTType::AST_EXPR_OPERAND_NUMFLOAT, cur.value);
-        _pos++;
+        out_operand
+            = AST (_pos++, ASTType::AST_EXPR_OPERAND_NUMFLOAT, cur.value);
         if (_pos < _tokens.size ())
           {
             cur = _tokens.at (_pos);
             if (cur.type == TokenType::TOKEN_ID)
               {
-                out_operand.append (
-                    AST (ASTType::AST_EXPR_OPERAND_NUMTYPESPEC, cur.value));
-                _pos++;
+                out_operand.append (AST (
+                    _pos++, ASTType::AST_EXPR_OPERAND_NUMTYPESPEC, cur.value));
               }
           }
         return out_operand;
@@ -220,15 +215,15 @@ Parser::parse_expression_operand ()
 
     case TokenType::TOKEN_STRING:
       {
-        out_operand = AST (ASTType::AST_EXPR_OPERAND_STRING, cur.value);
-        _pos++;
+        out_operand
+            = AST (_pos++, ASTType::AST_EXPR_OPERAND_STRING, cur.value);
         return out_operand;
       }
 
     case TokenType::TOKEN_SYMBOL:
       {
-        out_operand = AST (ASTType::AST_EXPR_OPERAND_SYMBOL, cur.value);
-        _pos++;
+        out_operand
+            = AST (_pos++, ASTType::AST_EXPR_OPERAND_SYMBOL, cur.value);
         return out_operand;
       }
 
@@ -244,9 +239,9 @@ Parser::parse_expression_operand ()
   while (curtype == TokenType::TOKEN_LBRACK && _pos < _tokens.size ())
     {
       _pos++;
-      buf = AST (ASTType::AST_EXPR_OPERAND_ARRAY_ELEMENT);
 
       VERIFY_POS (_pos);
+      buf = AST (_pos, ASTType::AST_EXPR_OPERAND_ARRAY_ELEMENT);
 
       auto expr = parse_expression ();
       buf.append (expr);
@@ -265,16 +260,23 @@ Parser::parse_expression_operand ()
 }
 
 bool
-Parser::validate_expression (const AST &expr_ast) const
+Parser::validate_expression (const AST &expr_ast, size_t &invalid_pos,
+                             std::string &out_reason) const
 {
   if (expr_ast.is_empty ())
-    return false;
+    {
+      invalid_pos = expr_ast.token_position;
+      out_reason = "Expression is empty";
+      return false;
+    }
 
-  auto peek_ast_type = [] (const AST &root, int pos) -> ASTType {
+  auto peek_ast_type
+      = [] (const AST &root, int pos, size_t &tok_pos) -> ASTType {
     if (pos < 0 || pos >= root.children.size ())
       return ASTType::AST_ERR;
 
-    return root.children.at (pos).type;
+    tok_pos = root.children[pos].token_position;
+    return root.children[pos].type;
   };
 
   const int children_len = expr_ast.children.size ();
@@ -282,25 +284,33 @@ Parser::validate_expression (const AST &expr_ast) const
   ASTType cur = ASTType::AST_ERR;
   for (int i = 0; i < children_len; i++, prev = cur)
     {
-      cur = peek_ast_type (expr_ast, i);
+      size_t cur_pos = 0;
+      cur = peek_ast_type (expr_ast, i, cur_pos);
 
       if (is_prefix_operator (cur)
           && (prev == ASTType::AST_ERR || is_operator (prev)))
         {
-          auto next = peek_ast_type (expr_ast, i + 1);
+          size_t next_pos = 0;
+          auto next = peek_ast_type (expr_ast, i + 1, next_pos);
           if (is_operand (next) || is_prefix_operator (next))
             {
               continue;
             }
+          invalid_pos = cur_pos;
+          out_reason = "Prefix operator goes after operand";
           return false;
         }
       else if (is_operator (cur) && !is_operand (prev))
         {
+          invalid_pos = cur_pos;
+          out_reason = "Two operators";
           return false;
         }
       else if (is_operand (cur)
                && !(prev == ASTType::AST_ERR || is_operator (prev)))
         {
+          invalid_pos = cur_pos;
+          out_reason = "Two operands";
           return false;
         }
     }
@@ -313,6 +323,8 @@ Parser::validate_expression (const AST &expr_ast) const
         {
           if (has_assign_operator)
             {
+              invalid_pos = child.token_position;
+              out_reason = "Two assign operators";
               return false;
             }
           has_assign_operator = true;
@@ -320,7 +332,11 @@ Parser::validate_expression (const AST &expr_ast) const
     }
 
   if (!is_operand (expr_ast.children.at (children_len - 1).type))
-    return false;
+    {
+      invalid_pos = expr_ast.children.at (children_len - 1).token_position;
+      out_reason = "Last node in expression is not an operand";
+      return false;
+    }
 
   return true;
 }
@@ -341,6 +357,7 @@ Parser::pratt_parse_expression (const std::vector<AST> &in, size_t *pos,
   auto lhs = in.at ((*pos)++);
   if (is_prefix_operator (lhs.type))
     {
+      auto start_ast_pos = lhs.token_position;
       auto cur = lhs;
       std::vector<AST> prefixlist{};
 
@@ -361,7 +378,7 @@ Parser::pratt_parse_expression (const std::vector<AST> &in, size_t *pos,
         }
 
       // Put everything to `lhs`
-      lhs = AST (ASTType::AST_EXPR);
+      lhs = AST (start_ast_pos, ASTType::AST_EXPR);
       for (const auto &e : prefixlist)
         {
           lhs.append (e);
@@ -386,7 +403,7 @@ Parser::pratt_parse_expression (const std::vector<AST> &in, size_t *pos,
         }
       (*pos)++;
       auto rhs = pratt_parse_expression (in, pos, r_bp);
-      AST newlhs (ASTType::AST_EXPR);
+      AST newlhs (lhs.token_position, ASTType::AST_EXPR);
       newlhs.append (lhs);
       newlhs.append (op);
       newlhs.append (rhs);

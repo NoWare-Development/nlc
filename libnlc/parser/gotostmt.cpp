@@ -7,8 +7,7 @@ namespace nlc
 AST
 Parser::parse_goto_statement ()
 {
-  AST goto_statement (ASTType::AST_STMT_GOTO);
-  _pos++;
+  AST goto_statement (_pos++, ASTType::AST_STMT_GOTO);
   VERIFY_POS (_pos);
   auto label = parse_label ();
   goto_statement.append (label);

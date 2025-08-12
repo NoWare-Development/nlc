@@ -143,12 +143,14 @@ struct AST
   friend class Parser;
 
   AST () = default;
-  explicit AST (ASTType type, const std::string &value = "")
-      : value{ value }, type{ type }
+  explicit AST (size_t token_position, ASTType type,
+                const std::string &value = "")
+      : value{ value }, token_position{ token_position }, type{ type }
   {
   }
 
   std::string value;
+  size_t token_position;
   std::vector<AST> children{};
   ASTType type;
 

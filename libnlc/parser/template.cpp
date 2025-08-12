@@ -7,21 +7,19 @@ namespace nlc
 AST
 Parser::parse_template ()
 {
-  AST template_ (ASTType::AST_TEMPLATE);
-
-  _pos++;
+  AST template_ (_pos++, ASTType::AST_TEMPLATE);
 
   VERIFY_POS (_pos);
   auto cur = _tokens.at (_pos);
   VERIFY_TOKEN (_pos, cur.type, TokenType::TOKEN_LTHAN);
   _pos++;
 
-  AST type_list (ASTType::AST_TEMPLATE_TYPE_LIST);
+  AST type_list (_pos, ASTType::AST_TEMPLATE_TYPE_LIST);
   while (_pos < _tokens.size ())
     {
       cur = _tokens.at (_pos);
       VERIFY_TOKEN (_pos, cur.type, TokenType::TOKEN_ID);
-      type_list.append (AST (ASTType::AST_TEMPLATE_TYPE, cur.value));
+      type_list.append (AST (_pos, ASTType::AST_TEMPLATE_TYPE, cur.value));
 
       _pos++;
       auto next = peek (_pos);

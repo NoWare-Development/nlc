@@ -16,8 +16,9 @@ Parser::parse_function_argument ()
 
       if (next_two[0] == TokenType::TOKEN_PERIOD && next_two[0] == next_two[1])
         {
+          AST out (_pos, ASTType::AST_VARIADIC);
           _pos += 3;
-          return AST (ASTType::AST_VARIADIC);
+          return out;
         }
     }
 

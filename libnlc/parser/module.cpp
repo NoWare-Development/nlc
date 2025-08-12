@@ -10,9 +10,8 @@ Parser::parse_module ()
   auto cur = _tokens.at (_pos);
   VERIFY_TOKEN (_pos, cur.type, TokenType::TOKEN_ID);
 
-  AST module (ASTType::AST_MODULE, cur.value);
+  AST module (_pos++, ASTType::AST_MODULE, cur.value);
 
-  _pos++;
   auto next = peek (_pos);
   if (next == TokenType::TOKEN_DCOLON)
     {

@@ -9,8 +9,9 @@ Parser::parse_break_statement ()
 {
   auto next = peek (_pos + 1);
   VERIFY_TOKEN (_pos + 1, next, TokenType::TOKEN_SEMI);
+  AST out (_pos, ASTType::AST_STMT_BREAK);
   _pos += 2;
-  return AST (ASTType::AST_STMT_BREAK);
+  return out;
 }
 
 AST
@@ -18,16 +19,16 @@ Parser::parse_continue_statement ()
 {
   auto next = peek (_pos + 1);
   VERIFY_TOKEN (_pos + 1, next, TokenType::TOKEN_SEMI);
+  AST out (_pos, ASTType::AST_STMT_CONTINUE);
   _pos += 2;
-  return AST (ASTType::AST_STMT_CONTINUE);
+  return out;
 }
 
 AST
 Parser::parse_while_statement ()
 {
-  AST while_statement (ASTType::AST_STMT_WHILE);
+  AST while_statement (_pos++, ASTType::AST_STMT_WHILE);
 
-  _pos++;
   VERIFY_POS (_pos);
   auto cur = _tokens.at (_pos);
   VERIFY_TOKEN (_pos, cur.type, TokenType::TOKEN_LPAREN);
@@ -50,8 +51,8 @@ Parser::parse_while_statement ()
 AST
 Parser::parse_for_statement ()
 {
-  AST for_statement (ASTType::AST_STMT_FOR);
-  _pos++;
+  AST for_statement (_pos++, ASTType::AST_STMT_FOR);
+
   VERIFY_POS (_pos);
   auto cur = _tokens.at (_pos);
   VERIFY_TOKEN (_pos, cur.type, TokenType::TOKEN_LPAREN);
@@ -63,7 +64,7 @@ Parser::parse_for_statement ()
   cur = _tokens.at (_pos);
   if (cur.type == TokenType::TOKEN_SEMI)
     {
-      for_statement.append (AST (ASTType::AST_EXPR_OPERAND_NUM, "1"));
+      for_statement.append (AST (0, ASTType::AST_EXPR_OPERAND_NUM, "1"));
     }
   else
     {
@@ -95,9 +96,8 @@ Parser::parse_for_statement ()
 AST
 Parser::parse_do_while_statement ()
 {
-  AST do_while_statement (ASTType::AST_STMT_DOWHILE);
+  AST do_while_statement (_pos++, ASTType::AST_STMT_DOWHILE);
 
-  _pos++;
   VERIFY_POS (_pos);
 
   auto statement = parse_statement ();

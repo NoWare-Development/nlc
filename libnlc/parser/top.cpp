@@ -13,8 +13,7 @@ Parser::parse_top (bool for_export)
     {
     case TokenType::TOKEN_SEMI:
       {
-        _pos++;
-        return AST (ASTType::AST_NONE);
+        return AST (_pos++, ASTType::AST_NONE);
       }
 
     case TokenType::TOKEN_ID:

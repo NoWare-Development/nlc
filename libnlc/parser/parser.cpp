@@ -11,7 +11,7 @@ namespace nlc
 AST
 Parser::parse ()
 {
-  AST prog (ASTType::AST_PROG);
+  AST prog (_pos, ASTType::AST_PROG);
 
   while (_pos < _tokens.size ())
     {
@@ -54,7 +54,7 @@ Parser::number_to_operand (Token &tok) const
       return {};
     }
 
-  return AST (ASTType::AST_EXPR_OPERAND_NUM, hex_to_string (value));
+  return AST (_pos, ASTType::AST_EXPR_OPERAND_NUM, hex_to_string (value));
 }
 
 uint64_t

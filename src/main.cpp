@@ -27,9 +27,9 @@ main (int argc, char **argv)
 
   nlc::Lexer lexer{};
   auto tokens = lexer.tokenize (src);
-  for (auto &tok : tokens)
+  for (size_t i = 0; i < tokens.size (); i++)
     {
-      std::cout << tok.to_string () << '\n';
+      std::cout << "(" << i << ") " << tokens.at (i).to_string () << '\n';
     }
   handler.add_tokens (tokens);
   if (!handler.handle_tokens ())
@@ -38,14 +38,18 @@ main (int argc, char **argv)
     }
 
   nlc::Parser parser (tokens);
-  auto csts = parser.parse ();
+  auto asts = parser.parse ();
   auto errors = parser.get_errors ();
   handler.add_parser_errors (errors);
-  std::cout << csts.to_string ();
+  std::cout << asts.to_string ();
   std::cout << '\n';
   if (!handler.handle_parser_errors ())
     {
       return -3;
+    }
+  if (!handler.handle_invalid_expressions (asts))
+    {
+      return -4;
     }
 
   return 0;

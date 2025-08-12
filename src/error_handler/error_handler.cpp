@@ -58,6 +58,62 @@ ErrorHandler::handle_parser_errors () const
   return true;
 }
 
+bool
+ErrorHandler::handle_invalid_expressions (const nlc::AST &root) const
+{
+  std::vector<nlc::AST> errored_asts{};
+  collect_invalid_expressions (root, errored_asts);
+
+  if (!errored_asts.empty ())
+    {
+      for (const auto &e : errored_asts)
+        {
+          if (e.token_position >= _tokens.size ())
+            continue;
+
+          const auto &token = _tokens.at (e.token_position);
+
+          std::string message = get_message_start (
+              token.line + 1, token.end - token.len + 1, "error",
+              ESCColor::ESCCOLOR_RED, ESCGraphics::ESCGRAPHICS_BOLD);
+
+          message += "Expression error: ";
+          message += e.value;
+          message += '\n';
+
+          message += get_highlighted_token (token, ESCColor::ESCCOLOR_RED,
+                                            ESCGraphics::ESCGRAPHICS_BOLD);
+          message += '\n';
+
+          std::cout << message;
+        }
+      return false;
+    }
+
+  return true;
+}
+
+void
+ErrorHandler::collect_invalid_expressions (const nlc::AST &node,
+                                           std::vector<nlc::AST> &v) const
+{
+  for (const auto &c : node.children)
+    {
+      if (c.type == nlc::ASTType::AST_EXPR)
+        {
+          for (const auto &ec : c.children)
+            {
+              if (ec.type == nlc::ASTType::AST_ERR)
+                {
+                  v.push_back (ec);
+                }
+            }
+        }
+
+      collect_invalid_expressions (c, v);
+    }
+}
+
 void
 ErrorHandler::print_errored_tokens () const
 {
@@ -238,7 +294,7 @@ ErrorHandler::get_parser_error_reason (
       {
         std::string out{};
         out += "Invalid expression at line "
-               + std::to_string (_tokens.at (err.pos).line);
+               + std::to_string (_tokens.at (err.pos).line + 1);
         return out;
       }
 

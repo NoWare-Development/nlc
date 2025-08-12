@@ -11,8 +11,7 @@ Parser::parse_decldef ()
   auto cur = _tokens.at (_pos);
   if (cur.type == TokenType::TOKEN_ID && is_modifier (cur.value))
     {
-      AST modifier_decldef (ASTType::AST_MODIFIER, cur.value);
-      _pos++;
+      AST modifier_decldef (_pos++, ASTType::AST_MODIFIER, cur.value);
       auto underlying_decldef = parse_decldef ();
       modifier_decldef.append (underlying_decldef);
       return modifier_decldef;

@@ -221,7 +221,7 @@ private:
   // <structdef>
   //   : struct <id> { <decldefs> }
   //   ;
-  AST parse_struct();
+  AST parse_struct ();
 
   // <template>
   //   : template <ids> <templated>
@@ -245,7 +245,8 @@ private:
   AST parse_call_operand ();
   AST pratt_parse_expression (const std::vector<AST> &in, size_t *pos,
                               int min_bp) const;
-  bool validate_expression (const AST &expr_ast) const;
+  bool validate_expression (const AST &expr_ast, size_t &invalid_pos,
+                            std::string &out_reason) const;
   void get_binding_power (ASTType op_type, int &l_bp, int &r_bp) const;
 
   AST number_to_operand (Token &tok) const;
