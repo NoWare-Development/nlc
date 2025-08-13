@@ -191,6 +191,7 @@ asttype_to_string (ASTType type)
         "NUMTYPESPEC",
         "STRING",
         "SYMBOL",
+        "ACCESS_MEMBER",
     },
     {
         // TEMPLATE

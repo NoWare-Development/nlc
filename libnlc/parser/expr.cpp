@@ -141,6 +141,17 @@ Parser::parse_expression_operand ()
 
     case TokenType::TOKEN_ID:
       {
+        auto next = peek (_pos + 1);
+        if (next == TokenType::TOKEN_PERIOD)
+          {
+            std::cout << "GOT ACCESS MEMBER AT " << _pos << '\n';
+            AST out (_pos, ASTType::AST_EXPR_OPERAND_ACCESS_MEMBER, cur.value);
+            _pos += 2;
+            auto member = parse_expression_operand ();
+            out.append (member);
+            return out;
+          }
+
         if (cur.value == "cast")
           {
             AST cast (_pos++, ASTType::AST_EXPR_OPERAND_CAST_TO);
@@ -166,7 +177,7 @@ Parser::parse_expression_operand ()
             return cast;
           }
 
-        auto next = peek (_pos + 1);
+        next = peek (_pos + 1);
         if (next == TokenType::TOKEN_LPAREN)
           {
             auto call_operand = parse_call_operand ();

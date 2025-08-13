@@ -80,6 +80,10 @@ main :: (argc: int = 4*5, argv: char[][]) -> int {
   }
 
   defer { println("TESTLINE", 123llu, 4.0f); }
+
+  someStruct: SomeStruct;
+  someStruct.int_field = 5;
+  someStruct.struct_field.float_field = 5.0f;
 }
 
 testfunc :: () -> void {
