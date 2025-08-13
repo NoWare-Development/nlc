@@ -101,3 +101,11 @@ testfunc :: () -> void {
     }
   }
 }
+
+struct StructWithMarkers {
+public:
+  public_field: int = 5;
+
+private:
+  private_field: int = 4;
+}
