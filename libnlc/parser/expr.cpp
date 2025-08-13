@@ -144,11 +144,18 @@ Parser::parse_expression_operand ()
         auto next = peek (_pos + 1);
         if (next == TokenType::TOKEN_PERIOD)
           {
-            std::cout << "GOT ACCESS MEMBER AT " << _pos << '\n';
             AST out (_pos, ASTType::AST_EXPR_OPERAND_ACCESS_MEMBER, cur.value);
             _pos += 2;
             auto member = parse_expression_operand ();
             out.append (member);
+            return out;
+          }
+        else if (next == TokenType::TOKEN_DCOLON)
+          {
+            AST out (_pos, ASTType::AST_FROM_MODULE, cur.value);
+            _pos += 2;
+            auto symbol = parse_expression_operand ();
+            out.append (symbol);
             return out;
           }
 

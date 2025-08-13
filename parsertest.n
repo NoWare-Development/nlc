@@ -84,6 +84,9 @@ main :: (argc: int = 4*5, argv: char[][]) -> int {
   someStruct: SomeStruct;
   someStruct.int_field = 5;
   someStruct.struct_field.float_field = 5.0f;
+
+  someValue = someModule::someSymbol;
+  someModule1::someModule2::someSymbol = 5;
 }
 
 testfunc :: () -> void {

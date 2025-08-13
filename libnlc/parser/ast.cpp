@@ -96,6 +96,7 @@ asttype_to_string (ASTType type)
         "VARIADIC",
         "TEMPLATE",
         "STRUCT",
+        "FROM_MODULE",
     },
     {
         // STMT

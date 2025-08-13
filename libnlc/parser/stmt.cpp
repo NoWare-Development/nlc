@@ -101,8 +101,16 @@ Parser::parse_statement ()
         auto next = peek (_pos + 1);
         switch (next)
           {
-          case TokenType::TOKEN_COLON:
           case TokenType::TOKEN_DCOLON:
+            // Check if statement is function declaration/definition.
+            // If not, it is access from other module and should be treated as
+            // expression statement.
+            next = peek (_pos + 2);
+            if (next != TokenType::TOKEN_LPAREN)
+              {
+                break;
+              }
+          case TokenType::TOKEN_COLON:
             return parse_identifier_statement ();
           default:
             break;

@@ -289,7 +289,8 @@ Parser::is_prefix_operator (ASTType type) const
 bool
 Parser::is_operand (ASTType type) const
 {
-  return ((type & 0xFF00) >> 8) == AST_GROUP_EXPR_OPERAND || type == AST_EXPR;
+  return ((type & 0xFF00) >> 8) == AST_GROUP_EXPR_OPERAND || type == AST_EXPR
+         || type == AST_FROM_MODULE;
 }
 
 bool
