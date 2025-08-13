@@ -116,6 +116,8 @@ asttype_to_string (ASTType type)
         "CASE",
         "DEFAULT",
         "DEFER",
+        "IF",
+        "ELSE",
     },
     {
         // ENUM

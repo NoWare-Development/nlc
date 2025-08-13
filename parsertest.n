@@ -120,3 +120,11 @@ public:
 private:
   private_field: int = 4;
 }
+
+testFunc :: () -> void {
+  if (array == nullptr) return 0;
+
+  if (array != nullptr) {
+    std::io::println("Hello");
+  } else return 10;
+}

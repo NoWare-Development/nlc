@@ -14,6 +14,7 @@ libnlc_src += [
   'libnlc/parser/funcproto.cpp',
   'libnlc/parser/gotostmt.cpp',
   'libnlc/parser/idstmt.cpp',
+  'libnlc/parser/ifstmt.cpp',
   'libnlc/parser/import.cpp',
   'libnlc/parser/initlist.cpp',
   'libnlc/parser/label.cpp',

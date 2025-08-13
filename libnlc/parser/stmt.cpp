@@ -89,6 +89,10 @@ Parser::parse_statement ()
           {
             return parse_defer_statement ();
           }
+        else if (cur.value == "if")
+          {
+            return parse_if_statement ();
+          }
         else if (cur.value == "template")
           {
             return parse_template ();

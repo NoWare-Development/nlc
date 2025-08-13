@@ -158,6 +158,11 @@ Parser::parse_expression_operand ()
             out.append (symbol);
             return out;
           }
+        else if (next == TokenType::TOKEN_LPAREN)
+          {
+            auto call_operand = parse_call_operand ();
+            return call_operand;
+          }
 
         if (cur.value == "cast")
           {
@@ -182,13 +187,6 @@ Parser::parse_expression_operand ()
 
             cast.append (cast_expr);
             return cast;
-          }
-
-        next = peek (_pos + 1);
-        if (next == TokenType::TOKEN_LPAREN)
-          {
-            auto call_operand = parse_call_operand ();
-            return call_operand;
           }
 
         out_operand

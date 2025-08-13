@@ -147,6 +147,7 @@ private:
   //   | <labelstmt>
   //   | <idstmt>
   //   | <whilestmt>
+  //   | <ifstmt>
   //   | <forstmt>
   //   | <dowhilestmt>
   //   | <switchstmt>
@@ -217,6 +218,17 @@ private:
   //   : defer <stmt>
   //   ;
   AST parse_defer_statement ();
+
+  // <ifstmt>
+  //   : if <stmt> <elsestmt>
+  //   | if <stmt>
+  //   ;
+  AST parse_if_statement ();
+
+  // <elsestmt>
+  //   : else <stmt>
+  //   ;
+  AST parse_else_statement ();
 
   // <structdef>
   //   : struct <id> { <decldefs> }
