@@ -15,6 +15,7 @@ libnlc_src += [
   'libnlc/parser/gotostmt.cpp',
   'libnlc/parser/idstmt.cpp',
   'libnlc/parser/import.cpp',
+  'libnlc/parser/initlist.cpp',
   'libnlc/parser/label.cpp',
   'libnlc/parser/labelstmt.cpp',
   'libnlc/parser/loopstmts.cpp',

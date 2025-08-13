@@ -89,6 +89,8 @@ main :: (argc: int = 4*5, argv: char[][]) -> int {
   someModule1::someModule2::someSymbol = 5;
 
   variable: someModule::typeFromModule = 0;
+
+  initTest: someStruct = { .field = 5, 45.0f };
 }
 
 testfunc :: () -> void {

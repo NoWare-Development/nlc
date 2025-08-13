@@ -239,6 +239,17 @@ private:
   //   ;
   AST parse_visibility_marker ();
 
+  // <initlist>
+  //   : { <initlistentries> }
+  //   ;
+  AST parse_initialization_list ();
+
+  // <initlistentry>
+  //   : <expr>
+  //   | .<id> = <expr>
+  //   ;
+  AST parse_initialization_list_entry ();
+
   AST parse_break_statement ();    // break;
   AST parse_continue_statement (); // continue;
 

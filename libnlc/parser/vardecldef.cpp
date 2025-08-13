@@ -24,7 +24,20 @@ Parser::parse_variable_decldef ()
     {
       AST variable_def (_pos++, ASTType::AST_VAR_DEF, identifier);
       variable_def.append (type_);
-      variable_def.append (parse_expression ());
+
+      VERIFY_POS (_pos);
+      cur = _tokens.at (_pos);
+      if (cur.type == TokenType::TOKEN_LBRACE)
+        {
+          auto initlist = parse_initialization_list ();
+          variable_def.append (initlist);
+        }
+      else
+        {
+          auto expr = parse_expression ();
+          variable_def.append (expr);
+        }
+
       return variable_def;
     }
 
