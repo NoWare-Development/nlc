@@ -29,6 +29,14 @@ Parser::parse_struct ()
         {
           break;
         }
+
+      if (cur.type == TokenType::TOKEN_ID && cur.value == "template")
+        {
+          auto template_ = parse_template ();
+          structure.append (template_);
+          continue;
+        }
+
       auto decldef = parse_decldef ();
       structure.append (decldef);
     }
