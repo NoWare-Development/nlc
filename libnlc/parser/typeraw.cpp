@@ -18,6 +18,15 @@ Parser::parse_type_raw ()
     }
 
   VERIFY_TOKEN (_pos, cur.type, TokenType::TOKEN_ID);
+  auto next = peek (_pos + 1);
+  if (next == TokenType::TOKEN_DCOLON)
+    {
+      AST out (_pos, ASTType::AST_FROM_MODULE, cur.value);
+      _pos += 2;
+      auto member_type = parse_type_raw ();
+      out.append (member_type);
+      return out;
+    }
 
   return AST (_pos++, ASTType::AST_TYPE_PLAIN, cur.value);
 }

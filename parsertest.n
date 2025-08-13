@@ -87,6 +87,8 @@ main :: (argc: int = 4*5, argv: char[][]) -> int {
 
   someValue = someModule::someSymbol;
   someModule1::someModule2::someSymbol = 5;
+
+  variable: someModule::typeFromModule = 0;
 }
 
 testfunc :: () -> void {
