@@ -25,6 +25,7 @@ Parser::parse_statement_list ()
       stmtlist.append (statement);
     }
 
+  VERIFY_POS (_pos);
   VERIFY_TOKEN (_pos, cur.type, TokenType::TOKEN_RBRACE);
   _pos++;
   return stmtlist;
@@ -119,7 +120,14 @@ Parser::parse_statement ()
       break;
     }
 
-  return parse_expression_statement ();
+  auto out_expression_statement = parse_expression_statement ();
+  if (_errored)
+    {
+      _pos++;
+      return {};
+    }
+
+  return out_expression_statement;
 }
 
 }
