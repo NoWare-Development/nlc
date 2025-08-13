@@ -174,9 +174,19 @@ ErrorHandler::get_parser_error (const nlc::Parser::ParserError &err) const
   const std::string error_reason = get_parser_error_reason (err);
   std::string error_string{};
 
-  error_string += get_message_start (_nol, last_line ().length (), "error",
-                                     ESCColor::ESCCOLOR_RED,
-                                     ESCGraphics::ESCGRAPHICS_BOLD);
+  if (err.type != nlc::Parser::ParserError::ErrType::PARSER_ERROR_UNEXPECTED)
+    {
+      error_string += get_message_start (_nol, last_line ().length (), "error",
+                                         ESCColor::ESCCOLOR_RED,
+                                         ESCGraphics::ESCGRAPHICS_BOLD);
+    }
+  else
+    {
+      const auto &token = _tokens.at (err.pos);
+      error_string += get_message_start (
+          token.line + 1, token.end - token.len + 1, "error",
+          ESCColor::ESCCOLOR_RED, ESCGraphics::ESCGRAPHICS_BOLD);
+    }
   error_string += error_reason;
 
   if (err.type == nlc::Parser::ParserError::ErrType::PARSER_ERROR_UNEXPECTED)
