@@ -94,8 +94,7 @@ Parser::parse_expression_tree (bool toplevel)
 
       else if (is_operator (prev) || prev == TokenType::TOKEN_ERR)
         {
-          if (cur == TokenType::TOKEN_MUL       // Dereference
-              || cur == TokenType::TOKEN_ID     // Identifier
+          if (cur == TokenType::TOKEN_ID        // Identifier
               || cur == TokenType::TOKEN_LPAREN // Nested expression
               || cur == TokenType::TOKEN_STRING
               || cur == TokenType::TOKEN_SYMBOL || is_numeric_token (cur))
