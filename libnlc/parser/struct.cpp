@@ -30,11 +30,20 @@ Parser::parse_struct ()
           break;
         }
 
-      if (cur.type == TokenType::TOKEN_ID && cur.value == "template")
+      if (cur.type == TokenType::TOKEN_ID)
         {
-          auto template_ = parse_template ();
-          structure.append (template_);
-          continue;
+          if (cur.value == "template")
+            {
+              auto template_ = parse_template ();
+              structure.append (template_);
+              continue;
+            }
+          else if (cur.value == "public" || cur.value == "private")
+            {
+              auto vismarker = parse_visibility_marker ();
+              structure.append (vismarker);
+              continue;
+            }
         }
 
       auto decldef = parse_decldef ();

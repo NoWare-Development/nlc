@@ -233,6 +233,12 @@ private:
   //   ;
   AST parse_template ();
 
+  // <vismarker>
+  //   : public:
+  //   | private:
+  //   ;
+  AST parse_visibility_marker ();
+
   AST parse_break_statement ();    // break;
   AST parse_continue_statement (); // continue;
 

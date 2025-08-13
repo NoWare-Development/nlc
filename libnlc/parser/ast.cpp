@@ -76,6 +76,7 @@ asttype_to_string (ASTType type)
     "EXPR_PREFIX_OPERATOR",
     "EXPR_OPERAND",
     "TEMPLATE",
+    "VISIBILITY_MARKER",
   };
 
   constexpr const char *ids[0x100][0x100] = {
@@ -195,6 +196,11 @@ asttype_to_string (ASTType type)
         // TEMPLATE
         "TYPE_LIST",
         "TYPE",
+    },
+    {
+        // VISIBILITY_MARKER
+        "PUBLIC",
+        "PRIVATE",
     },
   };
 

@@ -29,4 +29,5 @@ libnlc_src += [
   'libnlc/parser/typedef.cpp',
   'libnlc/parser/typeraw.cpp',
   'libnlc/parser/vardecldef.cpp',
+  'libnlc/parser/vismarker.cpp',
 ]
