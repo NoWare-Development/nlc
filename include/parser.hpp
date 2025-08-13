@@ -360,6 +360,7 @@ private:
     { TokenType::TOKEN_BNOT, ASTType::AST_EXPR_PREFIX_OPERATOR_BNOT },
     { TokenType::TOKEN_SUB, ASTType::AST_EXPR_PREFIX_OPERATOR_NEG },
     { TokenType::TOKEN_MUL, ASTType::AST_EXPR_PREFIX_OPERATOR_DEREF },
+    { TokenType::TOKEN_BAND, ASTType::AST_EXPR_PREFIX_OPERATOR_ADDRESS },
   };
 
   const std::vector<TokenType> _numeric_tokens = {

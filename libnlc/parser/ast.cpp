@@ -184,6 +184,7 @@ asttype_to_string (ASTType type)
         "BNOT",
         "NEG",
         "DEREF",
+        "ADDRESS",
     },
     {
         // EXPR_OPERAND
