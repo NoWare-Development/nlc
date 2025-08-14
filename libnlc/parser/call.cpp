@@ -16,10 +16,8 @@ Parser::parse_call_operand ()
   cur = _tokens.at (_pos);
   VERIFY_TOKEN (_pos, cur.type, TokenType::TOKEN_LPAREN);
 
-  // Arguments
   _pos++;
   VERIFY_POS (_pos);
-  bool has_prev = false;
   while (_pos < _tokens.size ())
     {
       cur = _tokens.at (_pos);
@@ -28,17 +26,24 @@ Parser::parse_call_operand ()
           break;
         }
 
-      // Expect comma before expression
-      if (has_prev)
+      if (cur.type == TokenType::TOKEN_LBRACE) // Initialization list
         {
-          VERIFY_TOKEN (_pos, cur.type, TokenType::TOKEN_COMMA);
-          _pos++;
-          VERIFY_POS (_pos);
+          auto initlist = parse_initialization_list ();
+          call.append (initlist);
+        }
+      else // Expression
+        {
+          auto expr = parse_expression ();
+          call.append (expr);
         }
 
-      auto expression = parse_expression ();
-      call.append (expression);
-      has_prev = true;
+      auto next = peek (_pos);
+      if (next != TokenType::TOKEN_RPAREN)
+        {
+          VERIFY_POS (_pos);
+          VERIFY_TOKEN (_pos, next, TokenType::TOKEN_COMMA);
+          _pos++;
+        }
     }
 
   VERIFY_POS (_pos);
