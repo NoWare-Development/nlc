@@ -83,6 +83,13 @@ Parser::parse_expression_tree (bool toplevel)
               continue;
             }
 
+          else if (is_boolean_operator (cur))
+            {
+              expr_tree.append (AST (_pos++, _boolean_operators.at (cur)));
+              prev = cur;
+              continue;
+            }
+
           // Assignment operators
           else if (is_assign_operator (cur) && toplevel)
             {
@@ -371,6 +378,8 @@ Parser::pratt_parse_expression (const std::vector<AST> &in, size_t *pos,
     return {};
 
   auto lhs = in.at ((*pos)++);
+
+  // Handle prefix operators
   if (is_prefix_operator (lhs.type))
     {
       auto start_ast_pos = lhs.token_position;
@@ -412,7 +421,7 @@ Parser::pratt_parse_expression (const std::vector<AST> &in, size_t *pos,
         }
 
       int l_bp, r_bp;
-      get_binding_power (op.type, r_bp, l_bp);
+      get_binding_power (op.type, l_bp, r_bp);
       if (l_bp < min_bp)
         {
           break;
@@ -443,12 +452,17 @@ Parser::get_binding_power (ASTType op_type, int &l_bp, int &r_bp) const
     case AST_GROUP_EXPR_ASSIGN_OPERATOR:
       l_bp = 10;
       r_bp = 15;
-      break;
+      return;
+
+    case AST_GROUP_EXPR_BOOLEAN_OPERATOR:
+      l_bp = 60;
+      r_bp = 65;
+      return;
 
     case AST_GROUP_EXPR_COMPARE_OPERATOR:
-      l_bp = 20;
-      r_bp = 25;
-      break;
+      l_bp = 70;
+      r_bp = 75;
+      return;
 
     default:
       break;
@@ -458,28 +472,28 @@ Parser::get_binding_power (ASTType op_type, int &l_bp, int &r_bp) const
     {
     case ASTType::AST_EXPR_BINARY_OPERATOR_ADD:
     case ASTType::AST_EXPR_BINARY_OPERATOR_SUB:
-      l_bp = 30;
-      r_bp = 35;
+      l_bp = 20;
+      r_bp = 25;
       return;
 
     case ASTType::AST_EXPR_BINARY_OPERATOR_MUL:
     case ASTType::AST_EXPR_BINARY_OPERATOR_DIV:
     case ASTType::AST_EXPR_BINARY_OPERATOR_MOD:
-      l_bp = 40;
-      r_bp = 45;
+      l_bp = 30;
+      r_bp = 35;
       return;
 
     case ASTType::AST_EXPR_BINARY_OPERATOR_SHL:
     case ASTType::AST_EXPR_BINARY_OPERATOR_SHR:
-      l_bp = 50;
-      r_bp = 55;
+      l_bp = 40;
+      r_bp = 45;
       return;
 
     case ASTType::AST_EXPR_BINARY_OPERATOR_AND:
     case ASTType::AST_EXPR_BINARY_OPERATOR_OR:
     case ASTType::AST_EXPR_BINARY_OPERATOR_XOR:
-      l_bp = 60;
-      r_bp = 65;
+      l_bp = 50;
+      r_bp = 55;
       return;
 
     default:

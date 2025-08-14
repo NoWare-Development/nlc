@@ -72,6 +72,7 @@ asttype_to_string (ASTType type)
     "FUNC",
     "EXPR_BINARY_OPERATOR",
     "EXPR_COMPARE_OPERATOR",
+    "EXPR_BOOLEAN_OPERATOR",
     "EXPR_ASSIGN_OPERATOR",
     "EXPR_PREFIX_OPERATOR",
     "EXPR_OPERAND",
@@ -163,6 +164,11 @@ asttype_to_string (ASTType type)
         "GTHAN",
         "LTHANEQ",
         "GTHANEQ",
+    },
+    {
+        // EXPR_BOOLEAN_OPERATOR
+        "AND",
+        "OR",
     },
     {
         // EXPR_ASSIGN_OPERATOR

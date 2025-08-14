@@ -226,7 +226,8 @@ bool
 Parser::is_operator (TokenType type) const
 {
   return is_binary_operator (type) || is_assign_operator (type)
-         || is_compare_operator (type) || is_prefix_operator (type);
+         || is_compare_operator (type) || is_boolean_operator (type)
+         || is_prefix_operator (type);
 }
 
 #define IS_IN_MAP(map, val) (map).find ((val)) != (map).end ()
@@ -250,6 +251,12 @@ Parser::is_compare_operator (TokenType type) const
 }
 
 bool
+Parser::is_boolean_operator (TokenType type) const
+{
+  return IS_IN_MAP (_boolean_operators, type);
+}
+
+bool
 Parser::is_prefix_operator (TokenType type) const
 {
   return IS_IN_MAP (_prefix_operators, type);
@@ -259,7 +266,8 @@ bool
 Parser::is_operator (ASTType type) const
 {
   return is_binary_operator (type) || is_assign_operator (type)
-         || is_compare_operator (type) || is_prefix_operator (type);
+         || is_compare_operator (type) || is_boolean_operator (type)
+         || is_prefix_operator (type);
 }
 
 bool
@@ -278,6 +286,12 @@ bool
 Parser::is_compare_operator (ASTType type) const
 {
   return ((type >> 8) & 0xFF) == AST_GROUP_EXPR_COMPARE_OPERATOR;
+}
+
+bool
+Parser::is_boolean_operator (ASTType type) const
+{
+  return ((type >> 8) & 0xFF) == AST_GROUP_EXPR_BOOLEAN_OPERATOR;
 }
 
 bool

@@ -300,6 +300,7 @@ private:
   bool is_binary_operator (TokenType type) const;
   bool is_assign_operator (TokenType type) const;
   bool is_compare_operator (TokenType type) const;
+  bool is_boolean_operator (TokenType type) const;
   bool is_prefix_operator (TokenType type) const;
   bool is_numeric_token (TokenType type) const;
 
@@ -307,6 +308,7 @@ private:
   bool is_binary_operator (ASTType type) const;
   bool is_assign_operator (ASTType type) const;
   bool is_compare_operator (ASTType type) const;
+  bool is_boolean_operator (ASTType type) const;
   bool is_prefix_operator (ASTType type) const;
 
   bool is_operand (ASTType type) const;
@@ -339,6 +341,11 @@ private:
     { TokenType::TOKEN_GTHAN, ASTType::AST_EXPR_COMPARE_OPERATOR_GTHAN },
     { TokenType::TOKEN_LTHANEQ, ASTType::AST_EXPR_COMPARE_OPERATOR_LTHANEQ },
     { TokenType::TOKEN_GTHANEQ, ASTType::AST_EXPR_COMPARE_OPERATOR_GTHANEQ },
+  };
+
+  const std::map<TokenType, ASTType> _boolean_operators = {
+    { TokenType::TOKEN_AND, ASTType::AST_EXPR_BOOLEAN_OPERATOR_AND },
+    { TokenType::TOKEN_OR, ASTType::AST_EXPR_BOOLEAN_OPERATOR_OR },
   };
 
   const std::map<TokenType, ASTType> _assign_operators = {
