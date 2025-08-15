@@ -132,5 +132,8 @@ testFunc :: () -> void {
 const funcPtrArray: (arg: int)[];
 
 testFunc :: () {
+  module1::module2::symbol;
+  module1::struct1.field;
+
   return;
 }

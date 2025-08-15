@@ -172,45 +172,7 @@ Parser::parse_expression_operand ()
             return cast;
           }
 
-        auto next = peek (_pos + 1);
-        if (next == TokenType::TOKEN_DCOLON)
-          {
-            AST out (_pos, ASTType::AST_FROM_MODULE, cur.value);
-            _pos += 2;
-            auto symbol = parse_expression_operand ();
-            out.append (symbol);
-            return out;
-          }
-        if (next == TokenType::TOKEN_LPAREN)
-          {
-            out_operand = parse_call_operand ();
-          }
-        else
-          {
-            out_operand = AST (_pos++, ASTType::AST_EXPR_OPERAND_IDENTIFIER,
-                               cur.value);
-          }
-
-        next = peek (_pos);
-        if (next == TokenType::TOKEN_PERIOD)
-          {
-            _pos++;
-            VERIFY_POS (_pos);
-            auto symbol = parse_expression_operand ();
-
-            if (out_operand.type == ASTType::AST_EXPR_OPERAND_CALL)
-              {
-                AST access (_pos - 1, ASTType::AST_EXPR_OPERAND_ACCESS_MEMBER);
-                access.append (symbol);
-                out_operand.append (access);
-              }
-            else
-              {
-                out_operand.type = ASTType::AST_EXPR_OPERAND_ACCESS_MEMBER;
-                out_operand.append (symbol);
-              }
-          }
-
+        out_operand = parse_identifier_operand ();
         break;
       }
 

@@ -3,7 +3,7 @@ libnlc_src += [
 
   'libnlc/parser/arglist.cpp',
   'libnlc/parser/ast.cpp',
-  'libnlc/parser/call.cpp',
+  'libnlc/parser/callop.cpp',
   'libnlc/parser/casestmt.cpp',
   'libnlc/parser/decldef.cpp',
   'libnlc/parser/deferstmt.cpp',
@@ -15,6 +15,7 @@ libnlc_src += [
   'libnlc/parser/funcproto.cpp',
   'libnlc/parser/funcptrtype.cpp',
   'libnlc/parser/gotostmt.cpp',
+  'libnlc/parser/idop.cpp',
   'libnlc/parser/idstmt.cpp',
   'libnlc/parser/ifstmt.cpp',
   'libnlc/parser/import.cpp',
