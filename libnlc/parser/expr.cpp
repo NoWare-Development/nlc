@@ -195,6 +195,7 @@ Parser::parse_expression_operand ()
         if (next == TokenType::TOKEN_PERIOD)
           {
             _pos++;
+            VERIFY_POS (_pos);
             auto symbol = parse_expression_operand ();
 
             if (out_operand.type == ASTType::AST_EXPR_OPERAND_CALL)
@@ -289,6 +290,16 @@ Parser::parse_expression_operand ()
       current = buf;
 
       curtype = peek (_pos);
+    }
+
+  auto next = peek (_pos);
+  if (next == TokenType::TOKEN_PERIOD)
+    {
+      AST access (_pos++, ASTType::AST_EXPR_OPERAND_ACCESS_MEMBER);
+      VERIFY_POS (_pos);
+      auto symbol = parse_expression_operand ();
+      access.append (symbol);
+      current.append (access);
     }
 
   return current;
