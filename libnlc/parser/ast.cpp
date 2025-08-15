@@ -130,6 +130,7 @@ asttype_to_string (ASTType type)
         "PLAIN",
         "ARRAY",
         "POINTER",
+        "FUNCPTR",
     },
     {
         // VAR

@@ -5,16 +5,15 @@ namespace nlc
 {
 
 AST
-Parser::parse_function_prototype ()
+Parser::parse_function_pointer_type ()
 {
-  AST funcproto (_pos, ASTType::AST_FUNC_PROTO, _tokens.at (_pos).value);
+  AST funcptrtype (_pos, ASTType::AST_TYPE_FUNCPTR);
 
-  _pos += 2;
   VERIFY_POS (_pos);
   auto cur = _tokens.at (_pos);
   VERIFY_TOKEN (_pos, cur.type, TokenType::TOKEN_LPAREN);
-  auto arguments = parse_argument_list ();
-  funcproto.append (arguments);
+  auto arglist = parse_argument_list ();
+  funcptrtype.append (arglist);
 
   VERIFY_POS (_pos);
   cur = _tokens.at (_pos);
@@ -22,11 +21,10 @@ Parser::parse_function_prototype ()
 
   _pos++;
   VERIFY_POS (_pos);
-  auto return_type = parse_type ();
+  auto typeraw = parse_type_raw ();
+  funcptrtype.append (typeraw);
 
-  funcproto.append (return_type);
-
-  return funcproto;
+  return funcptrtype;
 }
 
 }

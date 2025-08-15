@@ -75,8 +75,14 @@ private:
   // <typeraw>
   //   : *<typeraw>
   //   | <id>
+  //   | <funcptrtype>
   //   ;
   AST parse_type_raw ();
+
+  // <funcptrtype>
+  //   : (<funcargs>) -> <type>
+  //   ;
+  AST parse_function_pointer_type ();
 
   // <enumdef>
   //   : enum <id> { <enumelements> }
@@ -261,6 +267,15 @@ private:
   //   | .<id> = <expr>
   //   ;
   AST parse_initialization_list_entry ();
+
+  // <arglist>
+  //   : (<args>)
+  //   ;
+  // <arg>
+  //   : <modifier> <arg>
+  //   | <id>: <type>
+  //   ;
+  AST parse_argument_list ();
 
   AST parse_break_statement ();    // break;
   AST parse_continue_statement (); // continue;

@@ -128,3 +128,5 @@ testFunc :: () -> void {
     std::io::println("Hello");
   } else return 10;
 }
+
+const funcPtrArray: (arg: int) -> *void[];

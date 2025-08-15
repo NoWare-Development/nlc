@@ -1,3 +1,4 @@
+#include "lexer.hpp"
 #include "libnlc/parser/macros.hpp"
 #include "parser.hpp"
 
@@ -15,6 +16,11 @@ Parser::parse_type_raw ()
       auto type_raw = parse_type_raw ();
       type_raw_pointer.append (type_raw);
       return type_raw_pointer;
+    }
+  else if (cur.type == TokenType::TOKEN_LPAREN)
+    {
+      auto funcptrtype = parse_function_pointer_type ();
+      return funcptrtype;
     }
 
   VERIFY_TOKEN (_pos, cur.type, TokenType::TOKEN_ID);
