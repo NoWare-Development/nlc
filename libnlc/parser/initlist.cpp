@@ -63,15 +63,34 @@ Parser::parse_initialization_list_entry ()
       VERIFY_TOKEN (_pos, cur.type, TokenType::TOKEN_EQ);
       _pos++;
 
-      auto expr = parse_expression ();
-      explicit_init.append (expr);
+      VERIFY_POS (_pos);
+      cur = _tokens.at (_pos);
+      if (cur.type == TokenType::TOKEN_LBRACE)
+        {
+          auto initlist = parse_initialization_list ();
+          explicit_init.append (initlist);
+        }
+      else
+        {
+          auto expr = parse_expression ();
+          explicit_init.append (expr);
+        }
 
       return explicit_init;
     }
 
   AST init (_pos, ASTType::AST_INITLIST_ENTRY_INIT);
-  auto expr = parse_expression ();
-  init.append (expr);
+
+  if (cur.type == TokenType::TOKEN_LBRACE)
+    {
+      auto initlist = parse_initialization_list ();
+      init.append (initlist);
+    }
+  else
+    {
+      auto expr = parse_expression ();
+      init.append (expr);
+    }
 
   return init;
 }
