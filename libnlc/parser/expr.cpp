@@ -147,24 +147,6 @@ Parser::parse_expression_operand ()
 
     case TokenType::TOKEN_ID:
       {
-        auto next = peek (_pos + 1);
-        if (next == TokenType::TOKEN_PERIOD)
-          {
-            AST out (_pos, ASTType::AST_EXPR_OPERAND_ACCESS_MEMBER, cur.value);
-            _pos += 2;
-            auto member = parse_expression_operand ();
-            out.append (member);
-            return out;
-          }
-        else if (next == TokenType::TOKEN_DCOLON)
-          {
-            AST out (_pos, ASTType::AST_FROM_MODULE, cur.value);
-            _pos += 2;
-            auto symbol = parse_expression_operand ();
-            out.append (symbol);
-            return out;
-          }
-
         if (cur.value == "cast")
           {
             AST cast (_pos++, ASTType::AST_EXPR_OPERAND_CAST_TO);
@@ -190,25 +172,44 @@ Parser::parse_expression_operand ()
             return cast;
           }
 
-        else if (next == TokenType::TOKEN_LPAREN)
+        auto next = peek (_pos + 1);
+        if (next == TokenType::TOKEN_DCOLON)
           {
-            auto call_operand = parse_call_operand ();
-
-            next = peek (_pos);
-            if (next == TokenType::TOKEN_PERIOD)
-              {
-                AST access (_pos, ASTType::AST_EXPR_OPERAND_ACCESS_MEMBER);
-                _pos++;
-                auto member = parse_expression_operand ();
-                access.append (member);
-                call_operand.append (access);
-              }
-
-            return call_operand;
+            AST out (_pos, ASTType::AST_FROM_MODULE, cur.value);
+            _pos += 2;
+            auto symbol = parse_expression_operand ();
+            out.append (symbol);
+            return out;
+          }
+        if (next == TokenType::TOKEN_LPAREN)
+          {
+            out_operand = parse_call_operand ();
+          }
+        else
+          {
+            out_operand = AST (_pos++, ASTType::AST_EXPR_OPERAND_IDENTIFIER,
+                               cur.value);
           }
 
-        out_operand
-            = AST (_pos++, ASTType::AST_EXPR_OPERAND_IDENTIFIER, cur.value);
+        next = peek (_pos);
+        if (next == TokenType::TOKEN_PERIOD)
+          {
+            _pos++;
+            auto symbol = parse_expression_operand ();
+
+            if (out_operand.type == ASTType::AST_EXPR_OPERAND_CALL)
+              {
+                AST access (_pos - 1, ASTType::AST_EXPR_OPERAND_ACCESS_MEMBER);
+                access.append (symbol);
+                out_operand.append (access);
+              }
+            else
+              {
+                out_operand.type = ASTType::AST_EXPR_OPERAND_ACCESS_MEMBER;
+                out_operand.append (symbol);
+              }
+          }
+
         break;
       }
 
