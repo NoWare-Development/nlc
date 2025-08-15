@@ -193,6 +193,17 @@ Parser::parse_expression_operand ()
         else if (next == TokenType::TOKEN_LPAREN)
           {
             auto call_operand = parse_call_operand ();
+
+            next = peek (_pos);
+            if (next == TokenType::TOKEN_PERIOD)
+              {
+                AST access (_pos, ASTType::AST_EXPR_OPERAND_ACCESS_MEMBER);
+                _pos++;
+                auto member = parse_expression_operand ();
+                access.append (member);
+                call_operand.append (access);
+              }
+
             return call_operand;
           }
 
