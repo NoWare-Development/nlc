@@ -15,6 +15,12 @@ Parser::parse_function_pointer_type ()
   auto arglist = parse_argument_list ();
   funcptrtype.append (arglist);
 
+  auto next = peek (_pos);
+  if (next != TokenType::TOKEN_RARROW)
+    {
+      return funcptrtype;
+    }
+
   VERIFY_POS (_pos);
   cur = _tokens.at (_pos);
   VERIFY_TOKEN (_pos, cur.type, TokenType::TOKEN_RARROW);

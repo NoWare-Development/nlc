@@ -16,6 +16,12 @@ Parser::parse_function_prototype ()
   auto arguments = parse_argument_list ();
   funcproto.append (arguments);
 
+  auto next = peek (_pos);
+  if (next != TokenType::TOKEN_RARROW)
+    {
+      return funcproto;
+    }
+
   VERIFY_POS (_pos);
   cur = _tokens.at (_pos);
   VERIFY_TOKEN (_pos, cur.type, TokenType::TOKEN_RARROW);

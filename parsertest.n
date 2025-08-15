@@ -129,4 +129,8 @@ testFunc :: () -> void {
   } else return 10;
 }
 
-const funcPtrArray: (arg: int) -> *void[];
+const funcPtrArray: (arg: int)[];
+
+testFunc :: () {
+  return;
+}
