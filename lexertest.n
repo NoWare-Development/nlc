@@ -1,12 +1,11 @@
-import std.io;
+import std::io;
 
 struct MyStruct {
   var: int;
 }
 
-@label:
-
 main :: (argc: int, argc: **char) -> int {
+@label:
   println("Hello, World!");
   return -0x30;
 
@@ -21,7 +20,7 @@ main :: (argc: int, argc: **char) -> int {
   break;
   continue;
 
-  for () return 30;
+  for (;;) return 30;
 
-  while () return 20;
+  while (true) return 20;
 }
