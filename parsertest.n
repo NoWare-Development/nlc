@@ -135,5 +135,16 @@ testFunc :: () {
   module1::module2::symbol;
   module1::struct1.field;
 
+  enum EnumInFunc {
+    VAL1,
+    VAL2,
+  }
+
   return;
+}
+
+union TestUnion {
+  var1: int;
+  var2: float;
+  var3: double;
 }
