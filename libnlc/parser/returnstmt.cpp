@@ -17,9 +17,16 @@ Parser::parse_return_statement ()
       _pos++;
       return return_statement;
     }
-
-  auto expr = parse_expression ();
-  return_statement.append (expr);
+  else if (cur.type == TokenType::TOKEN_LBRACE)
+    {
+      auto initlist = parse_initialization_list ();
+      return_statement.append (initlist);
+    }
+  else
+    {
+      auto expr = parse_expression ();
+      return_statement.append (expr);
+    }
   VERIFY_POS (_pos);
   cur = _tokens.at (_pos);
   VERIFY_TOKEN (_pos, cur.type, TokenType::TOKEN_SEMI);
