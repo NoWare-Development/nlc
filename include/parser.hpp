@@ -289,6 +289,8 @@ private:
   AST parse_break_statement ();    // break;
   AST parse_continue_statement (); // continue;
 
+  AST parse_generic_type_list (); // < <types> >
+
   // <expr>
   // NOTE: `toplevel` is passed only in expression statements.
   // It allows to use assignment operators in the expression.

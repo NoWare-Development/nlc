@@ -34,7 +34,15 @@ Parser::parse_type_raw ()
       return out;
     }
 
-  return AST (_pos++, ASTType::AST_TYPE_PLAIN, cur.value);
+  AST out (_pos++, ASTType::AST_TYPE_PLAIN, cur.value);
+  next = peek (_pos);
+  if (next == TokenType::TOKEN_LTHAN)
+    {
+      auto generic_type_list = parse_generic_type_list ();
+      out.append (generic_type_list);
+    }
+
+  return out;
 }
 
 }

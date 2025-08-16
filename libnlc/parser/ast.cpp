@@ -101,6 +101,7 @@ asttype_to_string (ASTType type)
         "UNION",
         "FROM_MODULE",
         "INITLIST",
+        "GENERIC_TYPE_LIST",
     },
     {
         // STMT

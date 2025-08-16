@@ -14,6 +14,7 @@ libnlc_src += [
   'libnlc/parser/funcdecldef.cpp',
   'libnlc/parser/funcproto.cpp',
   'libnlc/parser/funcptrtype.cpp',
+  'libnlc/parser/generic.cpp',
   'libnlc/parser/gotostmt.cpp',
   'libnlc/parser/idop.cpp',
   'libnlc/parser/idstmt.cpp',
