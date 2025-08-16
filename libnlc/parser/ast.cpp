@@ -98,6 +98,7 @@ asttype_to_string (ASTType type)
         "VARIADIC",
         "TEMPLATE",
         "STRUCT",
+        "UNION",
         "FROM_MODULE",
         "INITLIST",
     },

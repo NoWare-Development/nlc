@@ -30,6 +30,10 @@ Parser::parse_top (bool for_export)
           {
             return parse_struct ();
           }
+        else if (cur.value == "union")
+          {
+            return parse_union ();
+          }
         else if (cur.value == "template")
           {
             return parse_template ();

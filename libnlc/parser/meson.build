@@ -33,6 +33,7 @@ libnlc_src += [
   'libnlc/parser/type.cpp',
   'libnlc/parser/typedef.cpp',
   'libnlc/parser/typeraw.cpp',
+  'libnlc/parser/union.cpp',
   'libnlc/parser/vardecldef.cpp',
   'libnlc/parser/vismarker.cpp',
 ]

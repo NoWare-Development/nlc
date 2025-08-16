@@ -56,6 +56,12 @@ Parser::parse_struct ()
               structure.append (structdef);
               continue;
             }
+          else if (cur.value == "union")
+            {
+              auto uniondef = parse_union ();
+              structure.append (uniondef);
+              continue;
+            }
         }
 
       auto decldef = parse_decldef ();

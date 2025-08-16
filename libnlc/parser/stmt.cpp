@@ -53,6 +53,14 @@ Parser::parse_statement ()
           {
             return parse_struct ();
           }
+        else if (cur.value == "union")
+          {
+            return parse_union ();
+          }
+        else if (cur.value == "enum")
+          {
+            return parse_enum_definition ();
+          }
         else if (cur.value == "return")
           {
             return parse_return_statement ();

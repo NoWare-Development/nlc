@@ -54,6 +54,7 @@ private:
   //   | <structdef>
   //   | <enumdef>
   //   | <template>
+  //   | <uniondef>
   //   !export
   //   :
   //   | <import>
@@ -159,6 +160,8 @@ private:
   //   | <switchstmt>
   //   | <deferstmt>
   //   | <structdef>
+  //   | <enumdef>
+  //   | <uniondef>
   //   | <template>
   //   | break;
   //   | continue;
@@ -240,6 +243,12 @@ private:
   //   : struct <id> { <decldefs> }
   //   ;
   AST parse_struct ();
+
+  // <uniondef>
+  //   : union <id> { <decldefs> }
+  //   : union { <decldefs> }
+  //   ;
+  AST parse_union ();
 
   // <template>
   //   : template <ids> <templated>
