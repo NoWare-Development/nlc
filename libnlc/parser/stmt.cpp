@@ -123,7 +123,7 @@ Parser::parse_statement ()
                 break;
               }
           case TokenType::TOKEN_COLON:
-            return parse_identifier_statement ();
+            return parse_decldef ();
           default:
             break;
           }

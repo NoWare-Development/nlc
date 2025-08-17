@@ -17,7 +17,6 @@ libnlc_src += [
   'libnlc/parser/generic.cpp',
   'libnlc/parser/gotostmt.cpp',
   'libnlc/parser/idop.cpp',
-  'libnlc/parser/idstmt.cpp',
   'libnlc/parser/ifstmt.cpp',
   'libnlc/parser/import.cpp',
   'libnlc/parser/initlist.cpp',

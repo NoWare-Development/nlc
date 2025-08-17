@@ -152,7 +152,7 @@ private:
   //   | <returnstmt>
   //   | <gotostmt>
   //   | <labelstmt>
-  //   | <idstmt>
+  //   | <decldef>
   //   | <whilestmt>
   //   | <ifstmt>
   //   | <forstmt>
@@ -194,9 +194,6 @@ private:
   //   : @<id>
   //   ;
   AST parse_label ();
-
-  // <idstmt>
-  AST parse_identifier_statement ();
 
   // <whilestmt>
   //   : while (<expr>) <stmt>
