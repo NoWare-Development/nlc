@@ -133,8 +133,6 @@ private:
 
   char peek (size_t pos) const;
 
-  char get_spec_char (char c);
-
   bool is_processable (char c) const;
 };
 
