@@ -222,6 +222,7 @@ asttype_to_string (ASTType type)
         // INITLIST_ENTRY
         "INIT",
         "INIT_EXPLICIT",
+        "INIT_EXPLICT_TARGET",
     },
   };
 

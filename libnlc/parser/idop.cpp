@@ -5,7 +5,7 @@ namespace nlc
 {
 
 AST
-Parser::parse_identifier_operand ()
+Parser::parse_identifier_operand (bool accept_modules, bool accept_functions)
 {
   VERIFY_POS (_pos);
   auto cur = _tokens.at (_pos);
@@ -14,15 +14,16 @@ Parser::parse_identifier_operand ()
   AST out_operand;
 
   auto next = peek (_pos + 1);
-  if (next == TokenType::TOKEN_DCOLON)
+  if (next == TokenType::TOKEN_DCOLON && accept_modules)
     {
       AST out (_pos, ASTType::AST_FROM_MODULE, cur.value);
       _pos += 2;
-      auto symbol = parse_identifier_operand ();
+      auto symbol
+          = parse_identifier_operand (accept_modules, accept_functions);
       out.append (symbol);
       return out;
     }
-  else if (next == TokenType::TOKEN_LPAREN)
+  else if (next == TokenType::TOKEN_LPAREN && accept_functions)
     {
       out_operand = parse_call_operand ();
     }
@@ -37,7 +38,8 @@ Parser::parse_identifier_operand ()
     {
       _pos++;
       VERIFY_POS (_pos);
-      auto symbol = parse_identifier_operand ();
+      auto symbol
+          = parse_identifier_operand (accept_modules, accept_functions);
 
       if (out_operand.type == ASTType::AST_EXPR_OPERAND_CALL)
         {

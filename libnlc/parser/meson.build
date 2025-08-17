@@ -2,6 +2,7 @@ libnlc_src += [
   'libnlc/parser/parser.cpp',
 
   'libnlc/parser/arglist.cpp',
+  'libnlc/parser/arrayelem.cpp',
   'libnlc/parser/ast.cpp',
   'libnlc/parser/callop.cpp',
   'libnlc/parser/casestmt.cpp',

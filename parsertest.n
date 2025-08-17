@@ -65,7 +65,7 @@ main :: (argc: int = 4*5, argv: char[][]) -> int {
   }
 
   for (i: size_t = 0; i < argc; i += 1) {
-    variable: int = nestedfunc(argc + i);
+    variable: int = nestedfunc(argc + i * cast(*int)(&argv[0].test));
   }
 
   call_to_func(123 + 4, id / 2.25f);
@@ -140,7 +140,10 @@ testFunc :: () {
     VAL2,
   }
 
-  return;
+  vector_var: Vector<int>;
+  vector_var.destroy();
+
+  return {};
 }
 
 union TestUnion {

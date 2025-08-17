@@ -49,14 +49,15 @@ Parser::parse_initialization_list_entry ()
   auto cur = _tokens.at (_pos);
   if (cur.type == TokenType::TOKEN_PERIOD)
     {
-      _pos++;
-
       VERIFY_POS (_pos);
       cur = _tokens.at (_pos);
-      VERIFY_TOKEN (_pos, cur.type, TokenType::TOKEN_ID);
-      AST explicit_init (_pos, ASTType::AST_INITLIST_ENTRY_INIT_EXPLICIT,
-                         cur.value);
-      _pos++;
+      AST explicit_init (_pos++, ASTType::AST_INITLIST_ENTRY_INIT_EXPLICIT);
+      VERIFY_POS (_pos);
+
+      AST target (_pos, ASTType::AST_INITLIST_ENTRY_INIT_EXPLICIT_TARGET);
+      auto target_symbol = parse_identifier_operand (false, false);
+      target_symbol = parse_array_element (target_symbol);
+      target.append (target_symbol);
 
       VERIFY_POS (_pos);
       cur = _tokens.at (_pos);

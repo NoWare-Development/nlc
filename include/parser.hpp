@@ -295,7 +295,9 @@ private:
   AST parse_expression_tree (bool toplevel = false);
   AST parse_expression_operand ();
   AST parse_call_operand ();
-  AST parse_identifier_operand ();
+  AST parse_identifier_operand (bool accept_modules = true,
+                                bool accept_functions = true);
+  AST parse_array_element (AST array);
   AST pratt_parse_expression (const std::vector<AST> &in, size_t *pos,
                               int min_bp) const;
   bool validate_expression (const AST &expr_ast, size_t &invalid_pos,
