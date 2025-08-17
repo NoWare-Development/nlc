@@ -107,7 +107,7 @@ Parser::parse_statement ()
           }
         else if (is_modifier (cur.value))
           {
-            return parse_identifier_statement ();
+            return parse_decldef ();
           }
 
         auto next = peek (_pos + 1);
