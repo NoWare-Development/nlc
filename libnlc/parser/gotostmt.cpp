@@ -1,5 +1,5 @@
 #include "libnlc/parser/macros.hpp"
-#include "parser.hpp"
+#include "parser/parser.hpp"
 
 namespace nlc
 {

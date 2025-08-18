@@ -1,6 +1,6 @@
-#include "ast.hpp"
 #include "libnlc/parser/macros.hpp"
-#include "parser.hpp"
+#include "parser/ast.hpp"
+#include "parser/parser.hpp"
 #include <iostream>
 #include <string>
 #include <vector>

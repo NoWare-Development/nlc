@@ -1,9 +1,9 @@
 #pragma once
 
-#include <ast.hpp>
 #include <cstdint>
-#include <lexer.hpp>
+#include <lexer/token.hpp>
 #include <map>
+#include <parser/ast.hpp>
 #include <vector>
 
 namespace nlc
