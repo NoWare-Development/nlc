@@ -22,14 +22,26 @@ Parser::parse_variable_decldef ()
 
   if (cur.type == TokenType::TOKEN_EQ)
     {
-      AST variable_def (ASTType::AST_VAR_DEF, identifier);
+      AST variable_def (_pos++, ASTType::AST_VAR_DEF, identifier);
       variable_def.append (type_);
-      _pos++;
-      variable_def.append (parse_expression ());
+
+      VERIFY_POS (_pos);
+      cur = _tokens.at (_pos);
+      if (cur.type == TokenType::TOKEN_LBRACE)
+        {
+          auto initlist = parse_initialization_list ();
+          variable_def.append (initlist);
+        }
+      else
+        {
+          auto expr = parse_expression ();
+          variable_def.append (expr);
+        }
+
       return variable_def;
     }
 
-  AST variable_decl (ASTType::AST_VAR_DECL, identifier);
+  AST variable_decl (_pos, ASTType::AST_VAR_DECL, identifier);
   variable_decl.append (type_);
   return variable_decl;
 }

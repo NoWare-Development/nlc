@@ -15,6 +15,7 @@ public:
 
   bool handle_tokens () const;
   bool handle_parser_errors () const;
+  bool handle_invalid_expressions (const nlc::AST &root) const;
 
 private:
   std::vector<nlc::Token> _tokens{};
@@ -27,6 +28,9 @@ private:
 
   void print_errored_tokens () const;
   void print_parser_errors () const;
+
+  void collect_invalid_expressions (const nlc::AST &node,
+                                    std::vector<nlc::AST> &v) const;
 
   std::string get_token_error (const nlc::Token &tok) const;
   std::string get_parser_error (const nlc::Parser::ParserError &err) const;

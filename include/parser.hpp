@@ -53,6 +53,8 @@ private:
   //   | <typedef>
   //   | <structdef>
   //   | <enumdef>
+  //   | <template>
+  //   | <uniondef>
   //   !export
   //   :
   //   | <import>
@@ -74,8 +76,14 @@ private:
   // <typeraw>
   //   : *<typeraw>
   //   | <id>
+  //   | <funcptrtype>
   //   ;
   AST parse_type_raw ();
+
+  // <funcptrtype>
+  //   : (<funcargs>) -> <type>
+  //   ;
+  AST parse_function_pointer_type ();
 
   // <enumdef>
   //   : enum <id> { <enumelements> }
@@ -144,12 +152,17 @@ private:
   //   | <returnstmt>
   //   | <gotostmt>
   //   | <labelstmt>
-  //   | <idstmt>
+  //   | <decldef>
   //   | <whilestmt>
+  //   | <ifstmt>
   //   | <forstmt>
   //   | <dowhilestmt>
   //   | <switchstmt>
   //   | <deferstmt>
+  //   | <structdef>
+  //   | <enumdef>
+  //   | <uniondef>
+  //   | <template>
   //   | break;
   //   | continue;
   //   ;
@@ -182,9 +195,6 @@ private:
   //   ;
   AST parse_label ();
 
-  // <idstmt>
-  AST parse_identifier_statement ();
-
   // <whilestmt>
   //   : while (<expr>) <stmt>
   //   ;
@@ -215,8 +225,68 @@ private:
   //   ;
   AST parse_defer_statement ();
 
+  // <ifstmt>
+  //   : if <stmt> <elsestmt>
+  //   | if <stmt>
+  //   ;
+  AST parse_if_statement ();
+
+  // <elsestmt>
+  //   : else <stmt>
+  //   ;
+  AST parse_else_statement ();
+
+  // <structdef>
+  //   : struct <id> { <decldefs> }
+  //   ;
+  AST parse_struct ();
+
+  // <uniondef>
+  //   : union <id> { <decldefs> }
+  //   : union { <decldefs> }
+  //   ;
+  AST parse_union ();
+
+  // <template>
+  //   : template <ids> <templated>
+  //   ;
+  // <templated>
+  //   : <structdef>
+  //   | <funcdecl>
+  //   | <funcdef>
+  //   ;
+  AST parse_template ();
+
+  // <vismarker>
+  //   : public:
+  //   | private:
+  //   ;
+  AST parse_visibility_marker ();
+
+  // <initlist>
+  //   : { <initlistentries> }
+  //   ;
+  AST parse_initialization_list ();
+
+  // <initlistentry>
+  //   : <expr>
+  //   | .<id> = <expr>
+  //   ;
+  AST parse_initialization_list_entry ();
+
+  // <arglist>
+  //   : (<args>)
+  //   ;
+  // <arg>
+  //   : <modifier> <arg>
+  //   | <id>: <type>
+  //   ;
+  AST parse_argument_list ();
+
   AST parse_break_statement ();    // break;
   AST parse_continue_statement (); // continue;
+
+  AST parse_generic_type_list (); // < <types> >
 
   // <expr>
   // NOTE: `toplevel` is passed only in expression statements.
@@ -225,9 +295,13 @@ private:
   AST parse_expression_tree (bool toplevel = false);
   AST parse_expression_operand ();
   AST parse_call_operand ();
+  AST parse_identifier_operand (bool accept_modules = true,
+                                bool accept_functions = true);
+  AST parse_array_element (AST array);
   AST pratt_parse_expression (const std::vector<AST> &in, size_t *pos,
                               int min_bp) const;
-  bool validate_expression (const AST &expr_ast) const;
+  bool validate_expression (const AST &expr_ast, size_t &invalid_pos,
+                            std::string &out_reason) const;
   void get_binding_power (ASTType op_type, int &l_bp, int &r_bp) const;
 
   AST number_to_operand (Token &tok) const;
@@ -252,6 +326,7 @@ private:
   bool is_binary_operator (TokenType type) const;
   bool is_assign_operator (TokenType type) const;
   bool is_compare_operator (TokenType type) const;
+  bool is_boolean_operator (TokenType type) const;
   bool is_prefix_operator (TokenType type) const;
   bool is_numeric_token (TokenType type) const;
 
@@ -259,6 +334,7 @@ private:
   bool is_binary_operator (ASTType type) const;
   bool is_assign_operator (ASTType type) const;
   bool is_compare_operator (ASTType type) const;
+  bool is_boolean_operator (ASTType type) const;
   bool is_prefix_operator (ASTType type) const;
 
   bool is_operand (ASTType type) const;
@@ -293,6 +369,11 @@ private:
     { TokenType::TOKEN_GTHANEQ, ASTType::AST_EXPR_COMPARE_OPERATOR_GTHANEQ },
   };
 
+  const std::map<TokenType, ASTType> _boolean_operators = {
+    { TokenType::TOKEN_AND, ASTType::AST_EXPR_BOOLEAN_OPERATOR_AND },
+    { TokenType::TOKEN_OR, ASTType::AST_EXPR_BOOLEAN_OPERATOR_OR },
+  };
+
   const std::map<TokenType, ASTType> _assign_operators = {
     { TokenType::TOKEN_EQ, ASTType::AST_EXPR_ASSIGN_OPERATOR_EQ },
     { TokenType::TOKEN_ADDEQ, ASTType::AST_EXPR_ASSIGN_OPERATOR_ADDEQ },
@@ -312,6 +393,7 @@ private:
     { TokenType::TOKEN_BNOT, ASTType::AST_EXPR_PREFIX_OPERATOR_BNOT },
     { TokenType::TOKEN_SUB, ASTType::AST_EXPR_PREFIX_OPERATOR_NEG },
     { TokenType::TOKEN_MUL, ASTType::AST_EXPR_PREFIX_OPERATOR_DEREF },
+    { TokenType::TOKEN_BAND, ASTType::AST_EXPR_PREFIX_OPERATOR_ADDRESS },
   };
 
   const std::vector<TokenType> _numeric_tokens = {

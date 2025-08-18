@@ -15,8 +15,7 @@ Parser::parse_type ()
   AST buf{};
   while (_pos < _tokens.size () && next == TokenType::TOKEN_LBRACK)
     {
-      _pos++;
-      buf = AST (ASTType::AST_TYPE_ARRAY);
+      buf = AST (_pos++, ASTType::AST_TYPE_ARRAY);
 
       next = peek (_pos);
       if (next != TokenType::TOKEN_RBRACK)

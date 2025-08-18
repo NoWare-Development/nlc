@@ -13,8 +13,7 @@ Parser::parse_top (bool for_export)
     {
     case TokenType::TOKEN_SEMI:
       {
-        _pos++;
-        return AST (ASTType::AST_NONE);
+        return AST (_pos++, ASTType::AST_NONE);
       }
 
     case TokenType::TOKEN_ID:
@@ -26,6 +25,18 @@ Parser::parse_top (bool for_export)
         else if (cur.value == "typedef")
           {
             return parse_typedef ();
+          }
+        else if (cur.value == "struct")
+          {
+            return parse_struct ();
+          }
+        else if (cur.value == "union")
+          {
+            return parse_union ();
+          }
+        else if (cur.value == "template")
+          {
+            return parse_template ();
           }
         else if (!for_export)
           {

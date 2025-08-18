@@ -528,15 +528,6 @@ Lexer::process_string ()
           break;
         }
 
-      if (c == '\\')
-        {
-          char spec = get_spec_char (_src.at (_pos + 1));
-          buf += spec;
-          _pos += 2;
-          rawlen += 2;
-          continue;
-        }
-
       buf += c;
       _pos++;
       rawlen++;
@@ -558,15 +549,6 @@ Lexer::process_symbol ()
           rawlen++;
           _pos++;
           break;
-        }
-
-      if (c == '\\')
-        {
-          char spec = get_spec_char (_src.at (_pos + 1));
-          buf += spec;
-          _pos += 2;
-          rawlen += 2;
-          continue;
         }
 
       buf += c;
@@ -670,23 +652,6 @@ Lexer::peek (size_t pos) const
       return _src.at (pos);
     }
   return 0;
-}
-
-char
-Lexer::get_spec_char (char c)
-{
-  switch (c)
-    {
-    default:
-    case '0':
-      return 0;
-    case 'n':
-      return '\n';
-    case 't':
-      return '\t';
-    case 'r':
-      return '\r';
-    }
 }
 
 bool

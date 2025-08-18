@@ -1,8 +1,8 @@
 # N-Lang compiler
 
 ## Manual build
-For Linux:
+Linux/OSX
 ```
-$ meson setup --native-file linux-native.ini build
+$ meson setup build
 $ ninja -v -C build
 ```

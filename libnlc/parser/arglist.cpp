@@ -5,22 +5,15 @@ namespace nlc
 {
 
 AST
-Parser::parse_call_operand ()
+Parser::parse_argument_list ()
 {
   VERIFY_POS (_pos);
   auto cur = _tokens.at (_pos);
-  VERIFY_TOKEN (_pos, cur.type, TokenType::TOKEN_ID);
-  AST call (ASTType::AST_EXPR_OPERAND_CALL, cur.value);
-
-  _pos++;
-  VERIFY_POS (_pos);
-  cur = _tokens.at (_pos);
   VERIFY_TOKEN (_pos, cur.type, TokenType::TOKEN_LPAREN);
+  AST arglist (_pos, ASTType::AST_FUNC_ARGLIST);
 
-  // Arguments
   _pos++;
   VERIFY_POS (_pos);
-  bool has_prev = false;
   while (_pos < _tokens.size ())
     {
       cur = _tokens.at (_pos);
@@ -29,17 +22,16 @@ Parser::parse_call_operand ()
           break;
         }
 
-      // Expect comma before expression
-      if (has_prev)
+      AST argument = parse_function_argument ();
+      arglist.append (argument);
+      auto next = peek (_pos);
+      if (next != TokenType::TOKEN_RPAREN)
         {
-          VERIFY_TOKEN (_pos, cur.type, TokenType::TOKEN_COMMA);
-          _pos++;
           VERIFY_POS (_pos);
+          VERIFY_TOKEN (_pos, next, TokenType::TOKEN_COMMA);
+          _pos++;
+          continue;
         }
-
-      auto expression = parse_expression ();
-      call.append (expression);
-      has_prev = true;
     }
 
   VERIFY_POS (_pos);
@@ -47,7 +39,7 @@ Parser::parse_call_operand ()
   VERIFY_TOKEN (_pos, cur.type, TokenType::TOKEN_RPAREN);
   _pos++;
 
-  return call;
+  return arglist;
 }
 
 }

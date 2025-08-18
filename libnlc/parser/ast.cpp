@@ -72,9 +72,13 @@ asttype_to_string (ASTType type)
     "FUNC",
     "EXPR_BINARY_OPERATOR",
     "EXPR_COMPARE_OPERATOR",
+    "EXPR_BOOLEAN_OPERATOR",
     "EXPR_ASSIGN_OPERATOR",
     "EXPR_PREFIX_OPERATOR",
     "EXPR_OPERAND",
+    "TEMPLATE",
+    "VISIBILITY_MARKER",
+    "INITLIST_ENTRY",
   };
 
   constexpr const char *ids[0x100][0x100] = {
@@ -92,6 +96,12 @@ asttype_to_string (ASTType type)
         "NONE",
         "LABEL",
         "VARIADIC",
+        "TEMPLATE",
+        "STRUCT",
+        "UNION",
+        "FROM_MODULE",
+        "INITLIST",
+        "GENERIC_TYPE_LIST",
     },
     {
         // STMT
@@ -109,6 +119,8 @@ asttype_to_string (ASTType type)
         "CASE",
         "DEFAULT",
         "DEFER",
+        "IF",
+        "ELSE",
     },
     {
         // ENUM
@@ -120,6 +132,7 @@ asttype_to_string (ASTType type)
         "PLAIN",
         "ARRAY",
         "POINTER",
+        "FUNCPTR",
     },
     {
         // VAR
@@ -156,6 +169,11 @@ asttype_to_string (ASTType type)
         "GTHANEQ",
     },
     {
+        // EXPR_BOOLEAN_OPERATOR
+        "AND",
+        "OR",
+    },
+    {
         // EXPR_ASSIGN_OPERATOR
         "EQ",
         "ADDEQ",
@@ -175,6 +193,7 @@ asttype_to_string (ASTType type)
         "BNOT",
         "NEG",
         "DEREF",
+        "ADDRESS",
     },
     {
         // EXPR_OPERAND
@@ -187,6 +206,23 @@ asttype_to_string (ASTType type)
         "NUMTYPESPEC",
         "STRING",
         "SYMBOL",
+        "ACCESS_MEMBER",
+    },
+    {
+        // TEMPLATE
+        "TYPE_LIST",
+        "TYPE",
+    },
+    {
+        // VISIBILITY_MARKER
+        "PUBLIC",
+        "PRIVATE",
+    },
+    {
+        // INITLIST_ENTRY
+        "INIT",
+        "INIT_EXPLICIT",
+        "INIT_EXPLICT_TARGET",
     },
   };
 

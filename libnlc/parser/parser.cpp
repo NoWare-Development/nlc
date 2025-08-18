@@ -11,7 +11,7 @@ namespace nlc
 AST
 Parser::parse ()
 {
-  AST prog (ASTType::AST_PROG);
+  AST prog (_pos, ASTType::AST_PROG);
 
   while (_pos < _tokens.size ())
     {
@@ -54,7 +54,7 @@ Parser::number_to_operand (Token &tok) const
       return {};
     }
 
-  return AST (ASTType::AST_EXPR_OPERAND_NUM, hex_to_string (value));
+  return AST (_pos, ASTType::AST_EXPR_OPERAND_NUM, hex_to_string (value));
 }
 
 uint64_t
@@ -226,7 +226,8 @@ bool
 Parser::is_operator (TokenType type) const
 {
   return is_binary_operator (type) || is_assign_operator (type)
-         || is_compare_operator (type) || is_prefix_operator (type);
+         || is_compare_operator (type) || is_boolean_operator (type)
+         || is_prefix_operator (type);
 }
 
 #define IS_IN_MAP(map, val) (map).find ((val)) != (map).end ()
@@ -250,6 +251,12 @@ Parser::is_compare_operator (TokenType type) const
 }
 
 bool
+Parser::is_boolean_operator (TokenType type) const
+{
+  return IS_IN_MAP (_boolean_operators, type);
+}
+
+bool
 Parser::is_prefix_operator (TokenType type) const
 {
   return IS_IN_MAP (_prefix_operators, type);
@@ -259,7 +266,8 @@ bool
 Parser::is_operator (ASTType type) const
 {
   return is_binary_operator (type) || is_assign_operator (type)
-         || is_compare_operator (type) || is_prefix_operator (type);
+         || is_compare_operator (type) || is_boolean_operator (type)
+         || is_prefix_operator (type);
 }
 
 bool
@@ -281,6 +289,12 @@ Parser::is_compare_operator (ASTType type) const
 }
 
 bool
+Parser::is_boolean_operator (ASTType type) const
+{
+  return ((type >> 8) & 0xFF) == AST_GROUP_EXPR_BOOLEAN_OPERATOR;
+}
+
+bool
 Parser::is_prefix_operator (ASTType type) const
 {
   return ((type >> 8) & 0xFF) == AST_GROUP_EXPR_PREFIX_OPERATOR;
@@ -289,7 +303,8 @@ Parser::is_prefix_operator (ASTType type) const
 bool
 Parser::is_operand (ASTType type) const
 {
-  return ((type & 0xFF00) >> 8) == AST_GROUP_EXPR_OPERAND || type == AST_EXPR;
+  return ((type & 0xFF00) >> 8) == AST_GROUP_EXPR_OPERAND || type == AST_EXPR
+         || type == AST_FROM_MODULE;
 }
 
 bool
