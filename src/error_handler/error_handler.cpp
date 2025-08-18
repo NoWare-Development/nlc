@@ -1,7 +1,7 @@
 #include "error_handler.hpp"
 #include "../util/util.hpp"
-#include "lexer.hpp"
-#include "parser.hpp"
+#include "lexer/token.hpp"
+#include "parser/parser.hpp"
 #include <iostream>
 #include <string>
 

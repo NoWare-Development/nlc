@@ -1,8 +1,8 @@
 #pragma once
 
-#include "parser.hpp"
+#include "parser/parser.hpp"
 #include "util/util.hpp"
-#include <lexer.hpp>
+#include <lexer/token.hpp>
 #include <vector>
 
 class ErrorHandler

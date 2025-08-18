@@ -1,8 +1,8 @@
 #include "error_handler/error_handler.hpp"
-#include "parser.hpp"
 #include <fstream>
 #include <iostream>
-#include <lexer.hpp>
+#include <lexer/lexer.hpp>
+#include <parser/parser.hpp>
 
 int
 main (int argc, char **argv)

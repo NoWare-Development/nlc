@@ -1,6 +1,6 @@
-#include "lexer.hpp"
+#include "lexer/token.hpp"
 #include "libnlc/parser/macros.hpp"
-#include "parser.hpp"
+#include "parser/parser.hpp"
 
 namespace nlc
 {
