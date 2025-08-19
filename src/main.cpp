@@ -59,6 +59,7 @@ main (int argc, char **argv)
                 << "nlc: " << escape_color (ESCColor::ESCCOLOR_RED)
                 << "fatal error: " << escape_reset ()
                 << "no input files\ncompilation terminated.\n";
+      return -1;
     }
 
   for (const auto &srcfile : sources)
@@ -70,7 +71,7 @@ main (int argc, char **argv)
                     << "nlc: " << escape_color (ESCColor::ESCCOLOR_RED)
                     << "fatal error: " << escape_reset ()
                     << "failed to open file \"" << srcfile << "\"\n";
-          return -1;
+          return -2;
         }
       std::stringstream buffer;
       buffer << file.rdbuf ();
@@ -89,7 +90,7 @@ main (int argc, char **argv)
       handler.add_tokens (tokens);
       if (!handler.handle_tokens ())
         {
-          return -2;
+          return -3;
         }
 
       nlc::Parser parser (tokens);
@@ -101,11 +102,11 @@ main (int argc, char **argv)
       std::cout << root.to_string () << '\n';
       if (!handler.handle_parser_errors ())
         {
-          return -3;
+          return -4;
         }
       if (!handler.handle_invalid_expressions (root))
         {
-          return -4;
+          return -5;
         }
     }
 
